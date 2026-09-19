@@ -543,37 +543,14 @@
     let map, markers = [], routePolylines = [];
     let currentFilter = 'all';
 
-    function getCompletedTasks() {
-      return JSON.parse(localStorage.getItem('rockies_completed_tasks_v6') || '{}');
-    }
-
-    function toggleTask(id) {
-      const completed = getCompletedTasks();
-      completed[id] = !completed[id];
-      localStorage.setItem('rockies_completed_tasks_v6', JSON.stringify(completed));
-      
-      updateProgressBar();
-      renderItems(currentFilter === 'all' ? locations : locations.filter(l => l.day === currentFilter));
-    }
-
-    function updateProgressBar() {
-      const completed = getCompletedTasks();
-      const totalCount = locations.length;
-      const completedCount = locations.filter(l => completed[l.id]).length;
-      const percentage = Math.round((completedCount / totalCount) * 100);
-
-      document.getElementById('progress-bar').style.width = `${percentage}%`;
-      document.getElementById('progress-text').innerText = `Trip Progress: ${completedCount}/${totalCount} Completed (${percentage}%)`;
-    }
-
     function initMap() {
-      map = L.map('map').setView([51.5, -115.5], 7);
+      map = L.map('map').setView([51.25, -115.80], 8);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 18,
         attribution: '© OpenStreetMap'
       }).addTo(map);
 
-      updateProgressBar();
-      renderItems(locations);
+      renderMarkersAndRoutes('all');
     }
 
     function getDayColor(day) {
@@ -585,91 +562,141 @@
       }
     }
 
-    function renderItems(items) {
-      const listContainer = document.getElementById('itinerary-list');
-      listContainer.innerHTML = '';
-
-      const completedMap = getCompletedTasks();
-
+    function renderMarkersAndRoutes(dayFilter) {
       markers.forEach(m => map.removeLayer(m));
       routePolylines.forEach(p => map.removeLayer(p));
       markers = [];
       routePolylines = [];
 
-      const boundsGroup = [];
+      const filtered = locations.filter(loc => dayFilter === 'all' || loc.day === dayFilter);
+      const bounds = [];
+
+      // Group routes by day
       const dayGroups = {};
-
-      items.forEach(loc => {
-        const isCompleted = !!completedMap[loc.id];
-        const dayColor = getDayColor(loc.day);
-
-        // Numbered Sequence Pin for Map
-        const numIcon = L.divIcon({
-          className: 'custom-pin-wrap',
-          html: `<div class="map-num-pin" style="background-color:${dayColor}">${loc.seq}</div>`,
-          iconSize: [22, 22],
-          iconAnchor: [11, 11]
-        });
-
-        const marker = L.marker([loc.lat, loc.lng], { icon: numIcon }).addTo(map)
-          .bindTooltip(`<b>#${loc.seq}. ${loc.title.replace(/^\d+\.\s*/, '')}</b>`, { permanent: false, direction: 'top' })
-          .bindPopup(`<strong style="color:${dayColor}">Day ${loc.day} - Stop ${loc.seq}</strong><br><b>${loc.title}</b> ${isCompleted ? '✅' : ''}<br>${loc.time}`);
-        
-        markers.push(marker);
-        boundsGroup.push([loc.lat, loc.lng]);
-
+      filtered.forEach(loc => {
         if (!dayGroups[loc.day]) dayGroups[loc.day] = [];
-        dayGroups[loc.day].push([loc.lat, loc.lng]);
-
-        // Detailed Action Steps
-        let stepsHtml = '';
-        if (loc.steps && loc.steps.length > 0) {
-          stepsHtml = `<div class="step-box"><strong>📋 Detailed Action Steps:</strong><ul>${loc.steps.map(s => `<li>${s}</li>`).join('')}</ul></div>`;
-        }
-
-        const card = document.createElement('div');
-        card.className = `itinerary-item day-${loc.day} ${isCompleted ? 'completed' : ''}`;
-        card.innerHTML = `
-          <div class="item-header">
-            <h3>${loc.title}</h3>
-            <label class="checkbox-container">
-              <input type="checkbox" ${isCompleted ? 'checked' : ''} onchange="toggleTask('${loc.id}')">
-              <span class="checkmark"></span>
-              Done
-            </label>
-          </div>
-          <div class="meta-row">
-            <span class="time-badge">⏰ ${loc.time}</span>
-            <span class="duration-badge">⏳ Duration: ${loc.duration}</span>
-            ${loc.hours ? `<span class="hours-badge">🏛️ Hours: ${loc.hours}</span>` : ''}
-          </div>
-          ${loc.warning ? `<div class="warning-box">${loc.warning}</div>` : ''}
-          <p style="font-size:0.8rem; color:#334155; margin-bottom:8px;">${loc.desc}</p>
-          ${stepsHtml}
-          ${loc.parking ? `<div class="parking-badge">🅿️ <strong>Parking:</strong> ${loc.parking}</div>` : ''}
-          ${loc.vegFood ? `<div class="veg-badge">🥗 <strong>Veg Recommendations:</strong> ${loc.vegFood}</div>` : ''}
-          <a class="nav-btn" href="https://www.google.com/maps/search/?api=1&query=${loc.query}" target="_blank">
-            🗺️ Open Google Maps
-          </a>
-        `;
-        listContainer.appendChild(card);
+        dayGroups[loc.day].push(loc);
       });
 
-      // Route Polyline Mapping
+      // Draw polyline routes per day
       Object.keys(dayGroups).forEach(dayNum => {
-        const coords = dayGroups[dayNum];
-        if (coords.length > 1) {
-          const polyline = L.polyline(coords, {
+        const points = dayGroups[dayNum].map(loc => [loc.lat, loc.lng]);
+        if (points.length > 1) {
+          const polyline = L.polyline(points, {
             color: getDayColor(parseInt(dayNum)),
-            weight: 4, opacity: 0.8, dashArray: '6, 8'
+            weight: 3.5,
+            opacity: 0.8,
+            dashArray: dayNum == 0 || dayNum == 4 ? '5, 8' : null
           }).addTo(map);
           routePolylines.push(polyline);
         }
       });
 
-      if (boundsGroup.length > 0) {
-        map.fitBounds(boundsGroup, { padding: [30, 30] });
+      // Add Markers
+      filtered.forEach(loc => {
+        bounds.push([loc.lat, loc.lng]);
+        const pinColor = getDayColor(loc.day);
+        const customIcon = L.divIcon({
+          className: 'custom-pin',
+          html: `<div class="map-num-pin" style="background-color: ${pinColor}">${loc.seq}</div>`,
+          iconSize: [22, 22],
+          iconAnchor: [11, 11]
+        });
+
+        const marker = L.marker([loc.lat, loc.lng], { icon: customIcon }).addTo(map);
+        marker.bindPopup(`
+          <div style="font-size:0.8rem; font-weight:bold; color:var(--primary);">${loc.title}</div>
+          <div style="font-size:0.72rem; color:#475569; margin-top:2px;">${loc.time}</div>
+          <a href="https://www.google.com/maps/search/?api=1&query=${loc.query}" target="_blank" style="font-size:0.72rem; color:#2563eb; text-decoration:none; display:inline-block; margin-top:4px;">🧭 Open in Google Maps</a>
+        `);
+        markers.push(marker);
+      });
+
+      if (bounds.length > 0) {
+        map.fitBounds(bounds, { padding: [30, 30] });
       }
+    }
+
+    function renderItinerary(dayFilter) {
+      const container = document.getElementById('itinerary-list');
+      container.innerHTML = '';
+
+      const filtered = locations.filter(loc => dayFilter === 'all' || loc.day === dayFilter);
+      const completedState = JSON.parse(localStorage.getItem('rockies_completed_v6') || '{}');
+
+      filtered.forEach(loc => {
+        const isChecked = !!completedState[loc.id];
+        const card = document.createElement('div');
+        card.className = `itinerary-item day-${loc.day} ${isChecked ? 'completed' : ''}`;
+        card.id = `card-${loc.id}`;
+
+        let stepsHtml = '';
+        if (loc.steps && loc.steps.length > 0) {
+          stepsHtml = `<div class="step-box"><strong>📋 Sequence & Directions:</strong><ul>${loc.steps.map(s => `<li>${s}</li>`).join('')}</ul></div>`;
+        }
+
+        let warningHtml = '';
+        if (loc.warning) {
+          warningHtml = `<div class="warning-box">${loc.warning}</div>`;
+        }
+
+        let vegHtml = '';
+        if (loc.vegFood) {
+          vegHtml = `<div class="veg-badge">🥗 <strong>Vegetarian Meal Note:</strong> ${loc.vegFood}</div>`;
+        }
+
+        card.innerHTML = `
+          <div class="item-header">
+            <h3>${loc.title}</h3>
+            <label class="checkbox-container">
+              <input type="checkbox" onchange="toggleComplete('${loc.id}')" ${isChecked ? 'checked' : ''}>
+              <span class="checkmark"></span>
+            </label>
+          </div>
+          <div class="meta-row">
+            <span class="time-badge">⏰ ${loc.time}</span>
+            <span class="duration-badge">⏱️ ${loc.duration}</span>
+            <span class="hours-badge">🏛️ ${loc.hours}</span>
+          </div>
+          ${warningHtml}
+          <p style="font-size: 0.78rem; color: #475569; margin-bottom: 8px;">${loc.desc}</p>
+          ${stepsHtml}
+          ${vegHtml}
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
+            <span class="parking-badge">🅿️ ${loc.parking}</span>
+            <a href="https://www.google.com/maps/search/?api=1&query=${loc.query}" target="_blank" class="nav-btn">🧭 Navigate</a>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      updateProgressBar();
+    }
+
+    function toggleComplete(id) {
+      const completedState = JSON.parse(localStorage.getItem('rockies_completed_v6') || '{}');
+      completedState[id] = !completedState[id];
+      localStorage.setItem('rockies_completed_v6', JSON.stringify(completedState));
+      
+      const card = document.getElementById(`card-${id}`);
+      if (card) {
+        if (completedState[id]) {
+          card.classList.add('completed');
+        } else {
+          card.classList.remove('completed');
+        }
+      }
+      updateProgressBar();
+    }
+
+    function updateProgressBar() {
+      const completedState = JSON.parse(localStorage.getItem('rockies_completed_v6') || '{}');
+      const total = locations.length;
+      const completedCount = locations.filter(loc => completedState[loc.id]).length;
+      const pct = Math.round((completedCount / total) * 100);
+
+      document.getElementById('progress-bar').style.width = `${pct}%`;
+      document.getElementById('progress-text').innerText = `Trip Progress: ${completedCount}/${total} Completed (${pct}%)`;
     }
 
     function filterDay(day) {
@@ -677,57 +704,59 @@
       document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
       event.target.classList.add('active');
 
-      const alertBox = document.getElementById('prep-alert');
-      if (day === 0) {
-        alertBox.innerHTML = `<strong>⚠️ Day 0 Arrival (Sep 29)</strong> Flight AA1632 lands 11:29 PM MDT. Pick up SUV at YYC and drive 35 mins to Calgary residence.`;
-      } else if (day === 1) {
-        alertBox.innerHTML = `<strong>⚠️ Day 1 Preparation (Sep 30)</strong> Start at 8:00 AM MDT from Calgary. Shuttle to Moraine Lake & Lake Louise. Takakkaw Falls in Yoho NP. Overnight in Golden.`;
-      } else if (day === 2) {
-        alertBox.innerHTML = `<strong>⚠️ Day 2 Preparation (Oct 01)</strong> Start at 8:30 AM PDT from Golden. Icefields Parkway, Columbia Icefield Glacier, Sunwapta & Athabasca Falls. Overnight in Golden.`;
-      } else if (day === 3) {
-        alertBox.innerHTML = `<strong>⚠️ Day 3 Preparation (Oct 02)</strong> Start at 8:30 AM PDT from Golden. Natural Bridge -> Emerald Lake -> Banff Gondola -> Cave & Basin -> Banff Downtown -> Calgary Stay.`;
-      } else if (day === 4) {
-        alertBox.innerHTML = `<strong>⚠️ Day 4 & Departure (Oct 03-04)</strong> Oct 03: Rest day in Calgary. Oct 04: Depart home at 4:30 AM MDT for 7:00 AM flight AA1633 to ORD.`;
-      } else {
-        alertBox.innerHTML = `<strong>⚠️ Complete Route View</strong> Map pins show exact visit numbers (#1, #2, #3). All timezones (MDT/PDT) are synchronized across Alberta and BC.`;
-      }
-
-      if (day === 'all') {
-        renderItems(locations);
-      } else {
-        renderItems(locations.filter(l => l.day === day));
-      }
+      renderMarkersAndRoutes(day);
+      renderItinerary(day);
     }
 
     function toggleAiModal() {
       const modal = document.getElementById('ai-modal');
-      modal.style.display = (modal.style.display === 'block') ? 'none' : 'block';
+      modal.style.display = modal.style.display === 'block' ? 'none' : 'block';
     }
 
-    async function askGemini() {
-      const input = document.getElementById('ai-input').value.toLowerCase();
+    function askGemini() {
+      const query = document.getElementById('ai-input').value.toLowerCase().trim();
       const output = document.getElementById('ai-output');
-      if (!input) return;
+      if (!query) return;
 
       output.style.display = 'block';
-      output.innerText = 'Consulting itinerary repository...';
+      output.innerHTML = '<em>Thinking...</em>';
 
       setTimeout(() => {
-        if (input.includes('weather') || input.includes('temp') || input.includes('rain')) {
-          output.innerHTML = "<strong>🌤️ Mountain Weather Forecast:</strong><br/>• <strong>Sep 30 (Day 1):</strong> Lake Louise 8°C / 0°C (Chilly morning, clear)<br/>• <strong>Oct 01 (Day 2):</strong> Columbia Icefield 2°C / -3°C (Sub-zero wind chill on glacier, heavy winter coat needed)<br/>• <strong>Oct 02 (Day 3):</strong> Banff 11°C / 1°C (Sunny & crisp afternoon)";
-        } else if (input.includes('where') || input.includes('time') || input.includes('schedule') || input.includes('day 3') || input.includes('sequence')) {
-          output.innerHTML = "<strong>📍 Day 3 Sequence (Oct 02):</strong><br/>1. Golden Departure (8:30 AM PDT)<br/>2. Natural Bridge Lower Falls (10:15 AM MDT)<br/>3. Emerald Lake Stroll (10:50 AM MDT)<br/>4. Banff Gondola (01:15 PM MDT)<br/>5. Cave and Basin (03:30 PM MDT)<br/>6. Banff Downtown & Lunch (04:45 PM MDT)<br/>7. Calgary Stay Drive (07:00 PM MDT)";
-        } else if (input.includes('timezone') || input.includes('pdt') || input.includes('mdt') || input.includes('time zone')) {
-          output.innerHTML = "<strong>🕒 Timezone Rules:</strong><br/>• <strong>Alberta (Calgary, Banff, Lake Louise):</strong> Mountain Daylight Time (MDT)<br/>• <strong>British Columbia (Golden):</strong> Pacific Daylight Time (PDT - 1 hour behind)<br/>• Crossing border gains/loses 1 hour!";
-        } else if (input.includes('food') || input.includes('veg') || input.includes('restaurant') || input.includes('eat')) {
-          output.innerHTML = "<strong>🥗 Recommended Vegetarian Restaurants:</strong><br/>• <strong>Banff:</strong> Nourish Bistro (100% Veg/Vegan)<br/>• <strong>Golden:</strong> Whitetooth Bistro & Indian Kitchen Golden<br/>• <strong>Lake Louise:</strong> Laggans Bakery & Trailhead Cafe<br/>• <strong>Calgary:</strong> Tamarind East Indian & Dosa Corner";
+        if (query.includes('day 3') || query.includes('sequence')) {
+          output.innerHTML = `<strong>Day 3 Sequence (Oct 02):</strong><br/>
+          1. Depart Golden (8:30 AM PDT)<br/>
+          2. Natural Bridge Lower Falls (9:15 AM PDT / 10:15 AM MDT)<br/>
+          3. Emerald Lake Stroll (10:50 AM MDT)<br/>
+          4. Banff Gondola - Sulphur Mountain (1:15 PM MDT)<br/>
+          5. Cave and Basin Historic Site (3:30 PM MDT - before 5 PM close)<br/>
+          6. Banff Downtown, Nourish Bistro & Cascade Gardens (4:45 PM MDT)<br/>
+          7. Drive to Calgary Residence (7:00 PM MDT)`;
+        } else if (query.includes('gondola') || query.includes('sulphur')) {
+          output.innerHTML = `<strong>Banff Gondola Details:</strong><br/>
+          • <strong>Location:</strong> 100 Mountain Ave, Banff AB.<br/>
+          • <strong>Time:</strong> Day 3 at 01:15 PM MDT.<br/>
+          • <strong>Accessibility:</strong> Wheelchair/Senior friendly. Enclosed cabins, elevators & indoor summit terminal.`;
+        } else if (query.includes('veg') || query.includes('food') || query.includes('dinner')) {
+          output.innerHTML = `<strong>Key Vegetarian Dining Spot Highlights:</strong><br/>
+          • <strong>Day 1 (Golden):</strong> Whitetooth Bistro (Tofu bowls, veg burgers).<br/>
+          • <strong>Day 2 (Golden):</strong> Indian Kitchen Golden (Paneer Butter Masala, Dal Makhani).<br/>
+          • <strong>Day 3 (Banff):</strong> Nourish Bistro Banff (100% Veggie Nachos & Curry Bowls).`;
+        } else if (query.includes('weather') || query.includes('cloth') || query.includes('cold')) {
+          output.innerHTML = `<strong>Weather Guidance:</strong><br/>
+          • <strong>Day 1:</strong> 8°C High / 0°C Low.<br/>
+          • <strong>Day 2 (Icefields):</strong> Sub-zero (-3°C wind chill). Gloves, beanie & winter coat needed!<br/>
+          • <strong>Day 3:</strong> 11°C High / 1°C Low. Summit of Sulphur Mountain requires windbreakers.`;
         } else {
-          output.innerHTML = "<strong>ℹ️ Itinerary Assistant Response:</strong><br/>Day 3 updated: Natural Bridge -> Emerald Lake -> Banff Gondola -> Cave & Basin -> Banff Downtown -> Calgary Stay. Parking, senior-care accessibility notes, and timings are fully synchronized.";
+          output.innerHTML = `<strong>General Travel Info:</strong><br/>
+          All locations feature senior-accessible options, flat walking routes, and nearby restrooms. Ensure Parks Canada Pass is displayed on your rental SUV windshield.`;
         }
       }, 400);
     }
 
-    window.onload = initMap;
+    document.addEventListener('DOMContentLoaded', () => {
+      initMap();
+      renderItinerary('all');
+    });
   </script>
 </body>
 </html>
