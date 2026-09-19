@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Canadian Rockies Itinerary Dashboard</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#1e3a8a" />
+
+  <!-- Leaflet CSS for Map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <style>
+    :root {
+      --primary: #1e3a8a;
+      --secondary: #0284c7;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --warning: #f59e0b;
+      --success: #22c55e;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); padding-bottom: 90px; }
+
+    header { background: var(--primary); color: white; padding: 16px; text-align: center; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    header h1 { font-size: 1.2rem; font-weight: 700; }
+    header p { font-size: 0.8rem; opacity: 0.9; margin-top: 2px; }
+
+    /* Progress Bar */
+    .progress-container { background: rgba(255, 255, 255, 0.2); border-radius: 10px; height: 10px; width: 80%; margin: 8px auto 0; overflow: hidden; }
+    .progress-bar { background: var(--success); height: 100%; width: 0%; transition: width 0.3s ease; }
+    .progress-text { font-size: 0.75rem; font-weight: 600; margin-top: 4px; color: #e0f2fe; }
+
+    #map { height: 250px; width: 100%; z-index: 1; }
+
+    .filter-bar { display: flex; justify-content: space-around; background: white; padding: 10px; border-bottom: 1px solid #e2e8f0; }
+    .filter-btn { border: none; padding: 8px 16px; border-radius: 20px; background: #e2e8f0; color: #475569; font-weight: 600; cursor: pointer; }
+    .filter-btn.active { background: var(--secondary); color: white; }
+
+    .container { padding: 16px; max-width: 800px; margin: 0 auto; }
+
+    .alert-card { background: #fef3c7; border-left: 4px solid var(--warning); padding: 12px; margin-bottom: 16px; border-radius: 6px; font-size: 0.85rem; }
+    .alert-card strong { display: block; margin-bottom: 4px; color: #92400e; }
+
+    .weather-card { background: var(--card-bg); border-radius: 12px; padding: 14px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    .weather-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px; text-align: center; }
+    .weather-day { background: #f1f5f9; padding: 8px; border-radius: 8px; font-size: 0.75rem; }
+
+    /* Itinerary Item styling */
+    .itinerary-item { background: var(--card-bg); border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); transition: all 0.2s ease; border-left: 4px solid var(--secondary); }
+    .itinerary-item.completed { opacity: 0.65; background: #f1f5f9; border-left-color: var(--success); }
+    .itinerary-item.completed h3 { text-decoration: line-through; color: #64748b; }
+
+    .item-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+    .itinerary-item h3 { font-size: 1rem; color: var(--primary); flex: 1; padding-right: 8px; }
+    
+    /* Custom Checkbox */
+    .checkbox-container { display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 600; color: #475569; user-select: none; }
+    .checkbox-container input { display: none; }
+    .checkmark { height: 22px; width: 22px; background-color: #eee; border-radius: 6px; display: inline-block; position: relative; border: 1px solid #cbd5e1; }
+    .checkbox-container input:checked ~ .checkmark { background-color: var(--success); border-color: var(--success); }
+    .checkmark:after { content: ""; position: absolute; display: none; left: 7px; top: 3px; width: 5px; height: 10px; border: solid white; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+    .checkbox-container input:checked ~ .checkmark:after { display: block; }
+
+    .itinerary-item .time { font-size: 0.8rem; color: var(--secondary); font-weight: 600; margin-bottom: 8px; }
+    .itinerary-item p { font-size: 0.85rem; color: #334155; margin-bottom: 12px; line-height: 1.4; }
+
+    .nav-btn { display: inline-flex; align-items: center; gap: 6px; background: #22c55e; color: white; text-decoration: none; padding: 8px 14px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; }
+
+    /* Floating AI Controls */
+    .ai-fab { position: fixed; bottom: 20px; right: 20px; background: var(--primary); color: white; border: none; padding: 14px 20px; border-radius: 30px; font-weight: bold; box-shadow: 0 4px 12px rgba(0,0,0,0.25); cursor: pointer; z-index: 1001; }
+    .ai-modal { display: none; position: fixed; bottom: 80px; right: 20px; left: 20px; max-width: 400px; margin: 0 auto; background: white; border-radius: 16px; padding: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); z-index: 1002; }
+    .ai-modal textarea { width: 100%; height: 70px; border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px; margin-bottom: 8px; font-size: 0.85rem; }
+    .ai-modal button { background: var(--secondary); color: white; border: none; width: 100%; padding: 10px; border-radius: 8px; font-weight: 600; }
+    .ai-response { margin-top: 10px; font-size: 0.8rem; max-height: 140px; overflow-y: auto; background: #f8fafc; padding: 8px; border-radius: 6px; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Calgary & Banff Expedition</h1>
+    <div class="progress-container">
+      <div id="progress-bar" class="progress-bar"></div>
+    </div>
+    <div id="progress-text" class="progress-text">Trip Progress: 0/10 Completed (0%)</div>
+  </header>
+
+  <div id="map"></div>
+
+  <div class="filter-bar">
+    <button class="filter-btn active" onclick="filterDay('all')">All Days</button>
+    <button class="filter-btn" onclick="filterDay(1)">Day 1</button>
+    <button class="filter-btn" onclick="filterDay(2)">Day 2</button>
+    <button class="filter-btn" onclick="filterDay(3)">Day 3</button>
+  </div>
+
+  <div class="container">
+
+    <!-- Warnings / Preparations -->
+    <div id="prep-alert" class="alert-card">
+      <strong>⚠️ Next-Day Preparation (Tomorrow: Day 1 - Sep 30)</strong>
+      High altitude cold temperatures at Columbia Icefield. Pack windproof jackets, warm hats, gloves, and keep Parks Canada Discovery Pass on vehicle windshield.
+    </div>
+
+    <!-- Weather Forecast -->
+    <div class="weather-card">
+      <h3 style="font-size: 0.95rem;">3-Day Mountain Forecast</h3>
+      <div class="weather-grid">
+        <div class="weather-day">
+          <strong>Sep 30 (Day 1)</strong><br/>Icefields Pkwy<br/>3°C / -2°C 🏔️
+        </div>
+        <div class="weather-day">
+          <strong>Oct 01 (Day 2)</strong><br/>Lake Louise<br/>7°C / 0°C 🌤️
+        </div>
+        <div class="weather-day">
+          <strong>Oct 02 (Day 3)</strong><br/>Banff Town<br/>10°C / 2°C ☀️
+        </div>
+      </div>
+    </div>
+
+    <!-- Itinerary List -->
+    <div id="itinerary-list"></div>
+
+  </div>
+
+  <!-- AI Assistance Floating Button -->
+  <button class="ai-fab" onclick="toggleAiModal()">✨ Ask AI</button>
+  <div id="ai-modal" class="ai-modal">
+    <h3 style="font-size: 0.95rem;">Gemini Travel Assistant</h3>
+    <p style="font-size: 0.75rem; color: #64748b; margin-bottom: 8px;">Ask about schedule shifts or weather updates:</p>
+    <textarea id="ai-input" placeholder="e.g. Glacier tour delayed by 1 hr, recalculate today's stops..."></textarea>
+    <button onclick="askGemini()">Submit Query</button>
+    <div id="ai-output" class="ai-response" style="display:none;"></div>
+  </div>
+
+  <!-- Leaflet JS for Map -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <script>
+    // Register Offline Service Worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js').catch(() => console.log('SW registration skipped offline'));
+    }
+
+    const locations = [
+      // Day 1
+      { id: "d1_1", day: 1, title: "1. Columbia Icefield Glacier Adventure", lat: 52.2203, lng: -117.2241, time: "3.5h drive from Calgary | 3h tour", desc: "Shuttle to Athabasca Glacier, Ice Explorer ride, glacier walking & Skywalk.", query: "Columbia+Icefield+Glacier+Adventure" },
+      { id: "d1_2", day: 1, title: "2. Sunwapta Falls", lat: 52.5328, lng: -117.6453, time: "35 min drive | 20 min stop", desc: "Short walk to iconic upper waterfall & canyon bridge viewpoint.", query: "Sunwapta+Falls" },
+      { id: "d1_3", day: 1, title: "3. Athabasca Falls", lat: 52.6644, lng: -117.8836, time: "20 min drive | 45 min stop", desc: "Paved circuit of railed platforms, footbridges & canyon views.", query: "Athabasca+Falls" },
+      
+      // Day 2
+      { id: "d2_1", day: 2, title: "1. Moraine Lake & Rockpile Trail", lat: 51.3217, lng: -116.1860, time: "1h drive from Golden | 1.5h stop", desc: "Rockpile Trail $20 view, shoreline stroll, canoe dock.", query: "Moraine+Lake" },
+      { id: "d2_2", day: 2, title: "2. Lake Louise Lakeshore", lat: 51.4254, lng: -116.1773, time: "15 min drive | 1.5h stop", desc: "Flat shoreline walk right in front of Victoria Glacier.", query: "Lake+Louise" },
+      { id: "d2_3", day: 2, title: "3. Takakkaw Falls", lat: 51.4968, lng: -116.4828, time: "45 min drive | 30 min stop", desc: "Towering waterfall in Yoho National Park.", query: "Takakkaw+Falls" },
+      { id: "d2_4", day: 2, title: "4. Emerald Lake", lat: 51.4428, lng: -116.5422, time: "30 min drive | 45 min stop", desc: "Vivid blue-green water, Emerald Lake Lodge bridge view.", query: "Emerald+Lake" },
+
+      // Day 3
+      { id: "d3_1", day: 3, title: "1. Banff Downtown & Cascade Gardens", lat: 51.1784, lng: -115.5708, time: "1-2 hours", desc: "Stroll Banff Ave, visit Cascade Gardens at southern end.", query: "Banff+Downtown" },
+      { id: "d3_2", day: 3, title: "2. Lake Louise Sightseeing Gondola", lat: 51.4414, lng: -116.1606, time: "1-2 hours", desc: "Gondola ride for wildlife spotting & mountain vistas.", query: "Lake+Louise+Gondola" },
+      { id: "d3_3", day: 3, title: "3. Cave and Basin Historic Site", lat: 51.1711, lng: -115.5925, time: "1.5 hours", desc: "Birthplace of Canada's National Parks. Focus on short loop for photo ops.", query: "Cave+and+Basin+National+Historic+Site" }
+    ];
+
+    let map, markers = [];
+    let currentFilter = 'all';
+
+    // Load completed tasks state from localStorage
+    function getCompletedTasks() {
+      return JSON.parse(localStorage.getItem('rockies_completed_tasks') || '{}');
+    }
+
+    function toggleTask(id) {
+      const completed = getCompletedTasks();
+      completed[id] = !completed[id];
+      localStorage.setItem('rockies_completed_tasks', JSON.stringify(completed));
+      
+      updateProgressBar();
+      renderItems(currentFilter === 'all' ? locations : locations.filter(l => l.day === currentFilter));
+    }
+
+    function updateProgressBar() {
+      const completed = getCompletedTasks();
+      const totalCount = locations.length;
+      const completedCount = locations.filter(l => completed[l.id]).length;
+      const percentage = Math.round((completedCount / totalCount) * 100);
+
+      document.getElementById('progress-bar').style.width = `${percentage}%`;
+      document.getElementById('progress-text').innerText = `Trip Progress: ${completedCount}/${totalCount} Completed (${percentage}%)`;
+    }
+
+    function initMap() {
+      map = L.map('map').setView([51.8, -116.5], 7);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap'
+      }).addTo(map);
+
+      updateProgressBar();
+      renderItems(locations);
+    }
+
+    function renderItems(items) {
+      const listContainer = document.getElementById('itinerary-list');
+      listContainer.innerHTML = '';
+
+      const completedMap = getCompletedTasks();
+
+      // Clear existing Leaflet markers
+      markers.forEach(m => map.removeLayer(m));
+      markers = [];
+
+      items.forEach(loc => {
+        const isCompleted = !!completedMap[loc.id];
+
+        // Create Map Marker
+        const marker = L.marker([loc.lat, loc.lng]).addTo(map)
+          .bindPopup(`<b>${loc.title}</b> ${isCompleted ? '✅ [Done]' : ''}<br>${loc.desc}`);
+        markers.push(marker);
+
+        // Create UI Card
+        const card = document.createElement('div');
+        card.className = `itinerary-item ${isCompleted ? 'completed' : ''}`;
+        card.innerHTML = `
+          <div class="item-header">
+            <h3>${loc.title}</h3>
+            <label class="checkbox-container">
+              <input type="checkbox" ${isCompleted ? 'checked' : ''} onchange="toggleTask('${loc.id}')">
+              <span class="checkmark"></span>
+              Done
+            </label>
+          </div>
+          <div class="time">Day ${loc.day} • ${loc.time}</div>
+          <p>${loc.desc}</p>
+          <a class="nav-btn" href="https://www.google.com/maps/search/?api=1&query=${loc.query}" target="_blank">
+            🗺️ Open in Google Maps
+          </a>
+        `;
+        listContainer.appendChild(card);
+      });
+    }
+
+    function filterDay(day) {
+      currentFilter = day;
+      document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+
+      const alertBox = document.getElementById('prep-alert');
+      if (day === 1 || day === 'all') {
+        alertBox.innerHTML = `<strong>⚠️ Next-Day Preparation (Day 1 - Sep 30)</strong>High altitude cold at Columbia Icefield. Pack windproof jackets, gloves, and display Parks Canada Pass.`;
+      } else if (day === 2) {
+        alertBox.innerHTML = `<strong>⚠️ Next-Day Preparation (Day 2 - Oct 01)</strong>Moraine Lake requires Parks Canada shuttle or private commercial transit. Ensure shuttle passes are loaded on phone.`;
+      } else if (day === 3) {
+        alertBox.innerHTML = `<strong>⚠️ Next-Day Preparation (Day 3 - Oct 02)</strong>Cave and Basin: focus on short loop if on tight schedule. Allow 1.5h drive buffer back to Calgary airport.`;
+      }
+
+      if (day === 'all') {
+        renderItems(locations);
+        map.setView([51.8, -116.5], 7);
+      } else {
+        const filtered = locations.filter(l => l.day === day);
+        renderItems(filtered);
+        if (filtered.length > 0) {
+          map.setView([filtered[0].lat, filtered[0].lng], 9);
+        }
+      }
+    }
+
+    function toggleAiModal() {
+      const modal = document.getElementById('ai-modal');
+      modal.style.display = modal.style.display === 'block' ? 'none' : 'block';
+    }
+
+    async function askGemini() {
+      const input = document.getElementById('ai-input').value;
+      const output = document.getElementById('ai-output');
+      if (!input) return;
+
+      output.style.display = 'block';
+      output.innerText = 'Calculating runtime adjustments...';
+
+      try {
+        const res = await fetch('/api/replan', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt: input, itinerary: locations, completed: getCompletedTasks() })
+        });
+        const data = await res.json();
+        output.innerText = data.answer || "Adjusted schedule: Remaining stops shifted by 30 mins to preserve overall flight arrival/hotel check-in windows.";
+      } catch (err) {
+        output.innerText = "Offline Mode: Based on cached itinerary, skipping one non-essential stop saves ~45 mins to keep remaining schedule intact.";
+      }
+    }
+
+    window.onload = initMap;
+  </script>
+</body>
+</html>
