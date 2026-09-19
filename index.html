@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Canadian Rockies Itinerary Dashboard v6</title>
+  <title>Canadian Rockies Itinerary Dashboard v7</title>
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#1e3a8a" />
 
@@ -97,6 +97,7 @@
     .meta-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
     .time-badge { font-size: 0.73rem; background: #eff6ff; color: #1d4ed8; padding: 3px 8px; border-radius: 4px; font-weight: 700; border: 1px solid #bfdbfe; }
     .duration-badge { font-size: 0.73rem; background: #fef2f2; color: #dc2626; padding: 3px 8px; border-radius: 4px; font-weight: 700; border: 1px solid #fecaca; }
+    .temp-badge { font-size: 0.73rem; background: #e0f2fe; color: #0369a1; padding: 3px 8px; border-radius: 4px; font-weight: 700; border: 1px solid #bae6fd; }
     .hours-badge { font-size: 0.73rem; background: #fef3c7; color: #92400e; padding: 3px 8px; border-radius: 4px; font-weight: 700; border: 1px solid #fde68a; }
 
     .step-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; font-size: 0.78rem; color: #334155; line-height: 1.45; margin-bottom: 8px; }
@@ -123,7 +124,7 @@
 <body>
 
   <header>
-    <h1>Calgary & Banff Expedition v6</h1>
+    <h1>Calgary & Banff Expedition v7</h1>
     <div class="progress-container">
       <div id="progress-bar" class="progress-bar"></div>
     </div>
@@ -151,24 +152,24 @@
 
   <div class="container">
 
-    <!-- Timezone Alert Notice -->
+    <!-- Timezone Notice -->
     <div class="tz-card">
-      <strong>🕒 Timezone Notice:</strong> Calgary, Lake Louise & Banff operate on <strong>Mountain Time (MDT)</strong>. Golden, BC operates on <strong>Pacific Time (PDT) - 1 Hour Behind</strong>. Crossing the AB/BC border gains/loses 1 hour!
+      <strong>🕒 Uniform Timezone Note:</strong> Golden, BC operates on <strong>Mountain Time (MDT)</strong>, remaining in lockstep with Calgary, Banff, Yoho, and Lake Louise. No clock adjustments or border time-shifts needed!
     </div>
 
-    <!-- Weather Forecast Box -->
+    <!-- Weather Summary Box -->
     <div id="weather-card" class="weather-card">
-      <strong>🌤️ Daily Weather & Clothing Reminders:</strong>
-      • <strong>Day 1 (Lake Louise):</strong> High 8°C / Low 0°C. Cool morning, wear fleece.<br/>
-      • <strong>Day 2 (Columbia Icefield):</strong> High 2°C / Low -3°C. Sub-zero wind chill on glacier! Thermal layers, gloves & beanies required.<br/>
-      • <strong>Day 3 (Banff/Gondola):</strong> High 11°C / Low 1°C. Crisp & pleasant afternoon. Bring windbreakers for Sulphur Mountain summit.
+      <strong>🌤️ Daily Weather & Clothing Summary:</strong>
+      • <strong>Day 1 (Lake Louise & Yoho):</strong> High 8°C / Low 0°C. Cool morning, wear fleece.<br/>
+      • <strong>Day 2 (Icefields Parkway):</strong> High 2°C / Low -3°C. Sub-zero wind chill on glacier! Thermals, gloves & beanies required.<br/>
+      • <strong>Day 3 (Yoho & Banff):</strong> High 11°C / Low 1°C. Crisp & pleasant afternoon. Windbreaker needed for Sulphur Mountain summit.
     </div>
 
     <!-- Parent & Senior Care Guidelines -->
     <div id="parent-card" class="parent-care-card">
       <h4>👴 Parents & Senior Care Considerations</h4>
       • <strong>Restroom Access:</strong> Available at Park & Ride, Moraine Lake Lodge, Lake Louise Lakeshore, Columbia Icefield Centre, Natural Bridge, Emerald Lake Lodge, Banff Gondola Terminal, and Banff Ave.<br/>
-      • <strong>Pacing & Mobility:</strong> Natural Bridge and Emerald Lake feature flat, paved/wooden paths directly adjacent to parking. Banff Gondola is fully wheelchair/senior accessible with elevators and enclosed 4-passenger cabins.
+      • <strong>Pacing & Mobility:</strong> Natural Bridge and Emerald Lake feature flat, paved/wooden paths directly adjacent to parking. Banff Gondola is fully senior-accessible with elevators and enclosed 4-passenger cabins.
     </div>
 
     <!-- Alert Banner -->
@@ -208,6 +209,7 @@
         id: "d0_1", day: 0, seq: 1, title: "1. Flight AA1632 Arrival & SUV Pickup",
         lat: 51.1215, lng: -114.0076,
         time: "11:29 PM – 12:30 AM MDT (Sep 29)", duration: "1 hour 01 min",
+        temp: "Night 6°C (Cool)",
         hours: "24 Hours Airport Access", warning: null,
         desc: "Land at YYC airport at 11:29 PM. Collect baggage, retrieve rental SUV, and load luggage.",
         steps: ["Arrive YYC terminal", "Claim luggage at Level 1", "Walk to Car Rental Centre", "Complete rental paperwork and load SUV"],
@@ -218,6 +220,7 @@
         id: "d0_2", day: 0, seq: 2, title: "2. Drive to Calgary Stay",
         lat: 50.8996, lng: -114.0954,
         time: "12:30 AM – 01:05 AM MDT (Sep 30 Overnight)", duration: "35 mins drive",
+        temp: "Night 5°C",
         hours: "Private Residence Check-in", warning: null,
         desc: "Drive directly from YYC Airport to Calgary residence.",
         steps: ["Take AB-2 S / Deerfoot Trail S", "Drive 38 km directly to 66 Silverado Skies Dr SW", "Park SUV and check in for sleep"],
@@ -230,6 +233,7 @@
         id: "d1_0", day: 1, seq: 1, title: "1. Depart Calgary Residence → Park & Ride",
         lat: 50.8996, lng: -114.0954,
         time: "08:00 AM – 10:00 AM MDT (Sep 30)", duration: "2 hours drive (184 km)",
+        temp: "Morning 3°C to 6°C",
         hours: "Park & Ride Lot Open 24/7", warning: null,
         desc: "Depart Calgary residence at 8:00 AM MDT to drive West to Lake Louise Park & Ride.",
         steps: [
@@ -246,6 +250,7 @@
         id: "d1_1", day: 1, seq: 2, title: "2. Shuttle to Moraine Lake & Rockpile Trail",
         lat: 51.3217, lng: -116.1860,
         time: "10:15 AM – 12:45 PM MDT", duration: "2 hours 30 mins",
+        temp: "Daytime 5°C to 8°C (Fleece/Jacket)",
         hours: "Shuttle Reservation Valid 10:00-11:00 AM Window",
         warning: "⚠️ Note for Parents: Rockpile trail has steep stairs. Benches are available at the base along shoreline.",
         desc: "Board Parks Canada Shuttle from Park & Ride to Moraine Lake. Explore Rockpile trail and lakefront.",
@@ -264,6 +269,7 @@
         id: "d1_2", day: 1, seq: 3, title: "3. Lake Louise Lakeshore & Lunch",
         lat: 51.4177, lng: -116.2169,
         time: "01:05 PM – 03:30 PM MDT", duration: "2 hours 25 mins",
+        temp: "Afternoon 8°C (Mild Sun)",
         hours: "Lakeshore Open 24 Hours", warning: null,
         desc: "Arrive via Lake Connector Shuttle. Flat paved shoreline walk in front of Fairmont Chateau & Victoria Glacier.",
         steps: [
@@ -280,16 +286,17 @@
       {
         id: "d1_3", day: 1, seq: 4, title: "4. Return to SUV → Drive to Takakkaw Falls",
         lat: 51.4968, lng: -116.4828,
-        time: "03:45 PM MDT – 05:15 PM MDT / 04:15 PM PDT", duration: "1 hour 30 mins",
+        time: "03:45 PM – 05:15 PM MDT", duration: "1 hour 30 mins",
+        temp: "Late Afternoon 7°C (Mist/Cool)",
         hours: "Yoho Valley Road Open (Closes mid-Oct)",
-        warning: "⚠️ Timezone Shift: Entering BC changes time from MDT to PDT (1 hour behind). Arrive Takakkaw at 4:30 PM MDT / 3:30 PM PDT.",
+        warning: null,
         desc: "Arrive back at Park & Ride, retrieve rental SUV, and drive West into Yoho National Park.",
         steps: [
           "03:45 PM MDT: Arrive back at Park & Ride via return shuttle",
-          "Drive West on Trans-Canada Hwy / BC-1 W into Yoho NP",
-          "04:30 PM MDT (03:30 PM PDT): Arrive at Takakkaw Falls Parking Lot",
+          "Drive West on Trans-Canada Hwy / AB-1 W into Yoho NP",
+          "04:30 PM MDT: Arrive at Takakkaw Falls Parking Lot",
           "Take easy 10-minute flat paved walk to base of waterfall",
-          "05:15 PM MDT (04:15 PM PDT): Depart Takakkaw Falls in SUV"
+          "05:15 PM MDT: Depart Takakkaw Falls in SUV"
         ],
         parking: "Takakkaw Falls Day Use Parking Lot",
         vegFood: null, query: "Takakkaw+Falls"
@@ -297,12 +304,13 @@
       {
         id: "d1_4", day: 1, seq: 5, title: "5. Drive to Golden Accommodation & Check-in",
         lat: 51.2985, lng: -116.9802,
-        time: "04:15 PM PDT – 05:15 PM PDT (Golden Time)", duration: "1 hour drive (58 km)",
-        hours: "Airbnb Check-in from 4:00 PM PDT", warning: null,
+        time: "05:15 PM – 06:15 PM MDT", duration: "1 hour drive (58 km)",
+        temp: "Evening 6°C",
+        hours: "Airbnb Check-in from 4:00 PM MDT", warning: null,
         desc: "Drive from Yoho National Park to Golden Airbnb stay.",
         steps: [
           "Drive West on Trans-Canada Hwy / BC-1 W to Golden, BC",
-          "05:15 PM PDT: Check in at 1549 Kicking Horse Trail, Golden BC",
+          "06:15 PM MDT: Check in at 1549 Kicking Horse Trail, Golden BC",
           "Relax and head out for dinner in Golden town center"
         ],
         parking: "On-site driveway parking at 1549 Kicking Horse Trail, Golden BC",
@@ -312,15 +320,15 @@
 
       // Day 2
       {
-        id: "d2_0", day: 2, seq: 1, title: "1. Depart Golden Accommodation (Start 8:30 AM PDT)",
+        id: "d2_0", day: 2, seq: 1, title: "1. Depart Golden Accommodation (Start 8:30 AM MDT)",
         lat: 51.2985, lng: -116.9802,
-        time: "08:30 AM PDT – 09:30 AM MDT (Oct 01)", duration: "1 hour drive to Icefields Pkwy",
+        time: "08:30 AM – 09:30 AM MDT (Oct 01)", duration: "1 hour drive to Icefields Pkwy",
+        temp: "Morning 1°C (Chilly)",
         hours: "Private Residence Departure", warning: null,
-        desc: "Depart Golden stay at 08:30 AM PDT (09:30 AM MDT) heading North toward Columbia Icefield.",
+        desc: "Depart Golden stay at 08:30 AM MDT heading North toward Columbia Icefield.",
         steps: [
-          "08:30 AM PDT (09:30 AM MDT): Depart 1549 Kicking Horse Trail, Golden BC in SUV",
-          "Drive East on BC-1 E then North on Icefields Pkwy / AB-93 N",
-          "Cross BC/AB border back into Mountain Time (+1 hour)"
+          "08:30 AM MDT: Depart 1549 Kicking Horse Trail, Golden BC in SUV",
+          "Drive East on BC-1 E then North on Icefields Pkwy / AB-93 N"
         ],
         parking: "1549 Kicking Horse Trail, Golden BC",
         vegFood: null, query: "1549+Kicking+Horse+Trail+Golden+BC"
@@ -328,7 +336,8 @@
       {
         id: "d2_1", day: 2, seq: 2, title: "2. Scenic Drive to Columbia Icefield Discovery Centre",
         lat: 52.2203, lng: -117.2241,
-        time: "09:30 AM MDT – 11:15 AM MDT", duration: "1 hour 45 mins drive",
+        time: "09:30 AM – 11:15 AM MDT", duration: "1 hour 45 mins drive",
+        temp: "Mid-day 2°C",
         hours: "Centre Opens 9:00 AM MDT", warning: null,
         desc: "Scenic highway drive along Icefields Parkway to Columbia Icefield Discovery Centre.",
         steps: [
@@ -342,9 +351,10 @@
       {
         id: "d2_2", day: 2, seq: 3, title: "3. Glacier Adventure & Skywalk Tour",
         lat: 52.2215, lng: -117.2250,
-        time: "11:30 AM MDT – 02:30 PM MDT", duration: "3 hours stop & tour",
+        time: "11:30 AM – 02:30 PM MDT", duration: "3 hours stop & tour",
+        temp: "Glacier Surface -3°C (Wind Chill / Freezing)",
         hours: "Tours Operating 9:00 AM - 5:00 PM MDT",
-        warning: "⚠️ Sub-Zero Temperature Warning: Glacier surface is freezing (-3°C wind chill). Wear heavy coats, gloves & beanies!",
+        warning: "⚠️ Sub-Zero Temperature Warning: Glacier surface is freezing (-3°C wind chill). Heavy coats, gloves & beanies required!",
         desc: "Ride Ice Explorer mammoth truck onto Athabasca Glacier (heated bus, wheelchair accessible) + Glass Skywalk.",
         steps: [
           "11:30 AM MDT: Check in at Discovery Centre desk",
@@ -360,7 +370,8 @@
       {
         id: "d2_3", day: 2, seq: 4, title: "4. Sunwapta Falls",
         lat: 52.5328, lng: -117.6453,
-        time: "03:05 PM MDT – 03:45 PM MDT", duration: "40 mins (35m drive + 20m stop)",
+        time: "03:05 PM – 03:45 PM MDT", duration: "40 mins (35m drive + 20m stop)",
+        temp: "Afternoon 3°C",
         hours: "Daylight Access Only", warning: null,
         desc: "Short drive north on Icefields Parkway. Walk 5 mins to footbridge overlooking canyon waterfall.",
         steps: [
@@ -374,7 +385,8 @@
       {
         id: "d2_4", day: 2, seq: 5, title: "5. Athabasca Falls",
         lat: 52.6644, lng: -117.8836,
-        time: "04:05 PM MDT – 05:00 PM MDT", duration: "55 mins (20m drive + 35m stop)",
+        time: "04:05 PM – 05:00 PM MDT", duration: "55 mins (20m drive + 35m stop)",
+        temp: "Late Afternoon 2°C",
         hours: "Daylight Access (Sunset ~7:00 PM)", warning: null,
         desc: "Paved circuit platforms with views of powerful waterfall and gorge.",
         steps: [
@@ -388,13 +400,13 @@
       {
         id: "d2_5", day: 2, seq: 6, title: "6. Drive Back to Golden Accommodation",
         lat: 51.2985, lng: -116.9802,
-        time: "05:00 PM MDT – 07:15 PM PDT", duration: "3 hours 15 mins drive (235 km)",
-        hours: "Private Residence",
-        warning: "⚠️ Timezone Gain: Crossing back into BC gains 1 hour. Arrive Golden at 07:15 PM PDT.",
+        time: "05:00 PM – 08:15 PM MDT", duration: "3 hours 15 mins drive (235 km)",
+        temp: "Evening 3°C",
+        hours: "Private Residence", warning: null,
         desc: "Relaxed scenic drive back along Icefields Parkway to Golden residence.",
         steps: [
           "Drive South via AB-93 S and BC-1 W",
-          "07:15 PM PDT: Arrive back at 1549 Kicking Horse Trail, Golden BC",
+          "08:15 PM MDT: Arrive back at 1549 Kicking Horse Trail, Golden BC",
           "Rest and enjoy dinner in Golden town"
         ],
         parking: "1549 Kicking Horse Trail, Golden BC",
@@ -402,15 +414,16 @@
         query: "1549+Kicking+Horse+Trail+Golden+BC"
       },
 
-      // Day 3 (Updated Sequence & Locations)
+      // Day 3
       {
-        id: "d3_0", day: 3, seq: 1, title: "1. Depart Golden Accommodation (Start 8:30 AM PDT)",
+        id: "d3_0", day: 3, seq: 1, title: "1. Depart Golden Accommodation (Start 8:30 AM MDT)",
         lat: 51.2985, lng: -116.9802,
-        time: "08:30 AM PDT (09:30 AM MDT - Oct 02)", duration: "45 mins drive to Natural Bridge",
+        time: "08:30 AM – 09:15 AM MDT (Oct 02)", duration: "45 mins drive to Natural Bridge",
+        temp: "Morning 2°C",
         hours: "Private Residence Departure", warning: null,
-        desc: "Check out of Golden accommodation and depart at 08:30 AM PDT heading East into Yoho National Park.",
+        desc: "Check out of Golden accommodation and depart at 08:30 AM MDT heading East into Yoho National Park.",
         steps: [
-          "08:30 AM PDT: Pack all luggage into rental SUV and depart Golden stay",
+          "08:30 AM MDT: Pack all luggage into rental SUV and depart Golden stay",
           "Drive East on Trans-Canada Hwy / BC-1 E toward Field, BC"
         ],
         parking: "1549 Kicking Horse Trail, Golden BC",
@@ -419,13 +432,14 @@
       {
         id: "d3_1", day: 3, seq: 2, title: "2. Natural Bridge Lower Falls",
         lat: 51.3824, lng: -116.5303,
-        time: "09:15 AM PDT / 10:15 AM MDT – 10:45 AM MDT", duration: "30 mins stop",
+        time: "09:15 AM – 10:15 AM MDT", duration: "1 hour stop",
+        temp: "Morning 4°C",
         hours: "Open 24 Hours", warning: null,
-        desc: "Impressive natural rock formation carved by the Kicking Horse River. Very short, flat paved walkway from the parking lot.",
+        desc: "Impressive natural rock formation carved by the Kicking Horse River. Very short, flat paved walkway from parking lot.",
         steps: [
-          "09:15 AM PDT (10:15 AM MDT): Arrive at Natural Bridge Parking Lot",
+          "09:15 AM MDT: Arrive at Natural Bridge Parking Lot",
           "Walk 2 minutes on flat paved path to viewing bridges & water chasms",
-          "10:45 AM MDT: Depart for Emerald Lake (5 mins drive)"
+          "10:15 AM MDT: Depart for Emerald Lake (5 mins drive)"
         ],
         parking: "Natural Bridge Day Use Parking Lot (Free)",
         vegFood: null, query: "Natural+Bridge+Yoho+National+Park"
@@ -433,13 +447,14 @@
       {
         id: "d3_2", day: 3, seq: 3, title: "3. Emerald Lake Morning Stroll",
         lat: 51.4428, lng: -116.5422,
-        time: "10:50 AM MDT – 12:00 PM MDT", duration: "1 hour 10 mins stop",
+        time: "10:20 AM – 11:30 AM MDT", duration: "1 hour 10 mins stop",
+        temp: "Late Morning 7°C",
         hours: "Open 24 Hours", warning: null,
         desc: "Enjoy morning reflection at Emerald Lake. Flat wooden bridge and shoreline bench seating ideal for parents.",
         steps: [
-          "10:50 AM MDT: Arrive at Emerald Lake Parking Lot",
+          "10:20 AM MDT: Arrive at Emerald Lake Parking Lot",
           "Stroll wooden bridge near Emerald Lake Lodge with parents",
-          "12:00 PM MDT: Depart for Banff Gondola (1 hour 15 mins drive)"
+          "11:30 AM MDT: Depart for Banff Gondola (1 hour 15 mins drive)"
         ],
         parking: "Emerald Lake Main Parking Lot",
         vegFood: "Cilantro Cafe at Emerald Lake Lodge - Good hot drinks & muffins.",
@@ -448,15 +463,16 @@
       {
         id: "d3_3", day: 3, seq: 4, title: "4. Banff Gondola (Sulphur Mountain Summit)",
         lat: 51.1485, lng: -115.5562,
-        time: "01:15 PM MDT – 03:15 PM MDT", duration: "2 hours stop",
+        time: "12:45 PM – 03:00 PM MDT", duration: "2 hours 15 mins stop",
+        temp: "Summit 1°C to 4°C (Breezy/Windbreaker needed)",
         hours: "Operating Hours: 9:00 AM – 9:00 PM MDT",
-        warning: "⚠️ Weather Note: Summit is windy and cool. Heated indoor upper terminal, elevators, and boardwalk seating available for seniors.",
+        warning: "⚠️ Weather Note: Summit is breezy and cool. Heated indoor upper terminal, elevators, and boardwalk seating available for seniors.",
         desc: "Ride fully enclosed 4-passenger gondola cabin up Sulphur Mountain (100 Mountain Ave) for 360-degree views of Banff & Bow Valley.",
         steps: [
-          "01:15 PM MDT: Arrive at Banff Gondola Terminal (100 Mountain Ave)",
+          "12:45 PM MDT: Arrive at Banff Gondola Terminal (100 Mountain Ave)",
           "Board enclosed gondola cabin to summit terminal (8-min ride)",
           "Explore upper boardwalk, multi-sensory theatre & panoramic observation deck",
-          "03:15 PM MDT: Return to base via gondola and drive to Cave & Basin (10 mins drive)"
+          "03:00 PM MDT: Return to base via gondola and drive to Cave & Basin (10 mins drive)"
         ],
         parking: "Banff Gondola Base Parking Lot",
         vegFood: "Sky Bistro / Northern Lights Alpine Kitchen (Summit Terminal) - Veggie bowls, fries & hot cocoa.",
@@ -465,12 +481,13 @@
       {
         id: "d3_4", day: 3, seq: 5, title: "5. Cave and Basin National Historic Site",
         lat: 51.1711, lng: -115.5925,
-        time: "03:30 PM MDT – 04:30 PM MDT", duration: "1 hour stop",
+        time: "03:15 PM – 04:30 PM MDT", duration: "1 hour 15 mins stop",
+        temp: "Afternoon 10°C (Mild)",
         hours: "Site Open 10:00 AM – 5:00 PM MDT (Indoor Exhibits Close 5:00 PM)",
-        warning: "⚠️ Timing Verified: Arriving at 3:30 PM allows full hour before indoor exhibits close at 5:00 PM.",
+        warning: "⚠️ Timing Verified: Arriving at 3:15 PM allows plenty of time before indoor exhibits close at 5:00 PM.",
         desc: "Birthplace of Canada's National Parks. Easy flat boardwalks around thermal hot springs and indoor cavern exhibit.",
         steps: [
-          "03:30 PM MDT: Arrive at Cave and Basin Historic Site",
+          "03:15 PM MDT: Arrive at Cave and Basin Historic Site",
           "Visit historic thermal cave and indoor museum displays",
           "Stroll short thermal boardwalk loop outside with parents",
           "04:30 PM MDT: Depart for Banff Downtown (5 mins drive)"
@@ -479,14 +496,15 @@
         vegFood: null, query: "Cave+and+Basin+National+Historic+Site"
       },
       {
-        id: "d3_5", day: 3, seq: 6, title: "6. Banff Downtown, Lunch/Dinner & Cascade Gardens",
+        id: "d3_5", day: 3, seq: 6, title: "6. Banff Downtown, Dinner & Cascade Gardens",
         lat: 51.1784, lng: -115.5708,
-        time: "04:45 PM MDT – 07:00 PM MDT", duration: "2 hours 15 mins stop",
+        time: "04:45 PM – 07:00 PM MDT", duration: "2 hours 15 mins stop",
+        temp: "Evening 8°C",
         hours: "Shops Open until 8:00 PM MDT", warning: null,
         desc: "Stroll Banff Avenue, enjoy vegetarian dinner, and visit Cascade of Time Gardens.",
         steps: [
           "04:45 PM MDT: Park at Bear Street Parkade in Banff town",
-          "05:00 PM MDT: Early Dinner / Lunch at Nourish Bistro Banff",
+          "05:00 PM MDT: Vegetarian Dinner at Nourish Bistro Banff",
           "06:15 PM MDT: Stroll to Cascade of Time Gardens (Flat pathways & flower terraces)",
           "07:00 PM MDT: Depart Banff for Calgary stay (1 hour 35 mins drive)"
         ],
@@ -497,7 +515,8 @@
       {
         id: "d3_6", day: 3, seq: 7, title: "7. Drive to Calgary Stay",
         lat: 50.8996, lng: -114.0954,
-        time: "07:00 PM MDT – 08:35 PM MDT", duration: "1 hour 35 mins drive (135 km)",
+        time: "07:00 PM – 08:35 PM MDT", duration: "1 hour 35 mins drive (135 km)",
+        temp: "Night 6°C",
         hours: "Private Residence", warning: null,
         desc: "Drive from Banff back to Calgary residence for remaining nights.",
         steps: [
@@ -515,6 +534,7 @@
         id: "d4_1", day: 4, seq: 1, title: "1. Rest & Recovery Day in Calgary (Oct 03)",
         lat: 50.8996, lng: -114.0954,
         time: "Full Day MDT (Oct 03)", duration: "Full Rest Day",
+        temp: "Day 12°C / Night 3°C",
         hours: "Full Day", warning: null,
         desc: "Full rest and recovery day at Calgary residence with family.",
         steps: ["Relax at home", "Pack luggage for early morning flight", "Early bed time for 4:00 AM wake up"],
@@ -526,6 +546,7 @@
         id: "d4_2", day: 4, seq: 2, title: "2. Early Airport Departure & Return Flight (Oct 04)",
         lat: 51.1215, lng: -114.0076,
         time: "04:30 AM – 07:00 AM MDT (Oct 04)", duration: "2 hours 30 mins process",
+        temp: "Early Morning 2°C",
         hours: "24 Hours Airport Access", warning: null,
         desc: "Early morning airport drive, SUV drop-off, and return flight AA1633 to ORD.",
         steps: [
@@ -571,14 +592,12 @@
       const filtered = locations.filter(loc => dayFilter === 'all' || loc.day === dayFilter);
       const bounds = [];
 
-      // Group routes by day
       const dayGroups = {};
       filtered.forEach(loc => {
         if (!dayGroups[loc.day]) dayGroups[loc.day] = [];
         dayGroups[loc.day].push(loc);
       });
 
-      // Draw polyline routes per day
       Object.keys(dayGroups).forEach(dayNum => {
         const points = dayGroups[dayNum].map(loc => [loc.lat, loc.lng]);
         if (points.length > 1) {
@@ -592,7 +611,6 @@
         }
       });
 
-      // Add Markers
       filtered.forEach(loc => {
         bounds.push([loc.lat, loc.lng]);
         const pinColor = getDayColor(loc.day);
@@ -607,6 +625,7 @@
         marker.bindPopup(`
           <div style="font-size:0.8rem; font-weight:bold; color:var(--primary);">${loc.title}</div>
           <div style="font-size:0.72rem; color:#475569; margin-top:2px;">${loc.time}</div>
+          <div style="font-size:0.72rem; color:#0284c7; font-weight:600;">🌡️ ${loc.temp}</div>
           <a href="https://www.google.com/maps/search/?api=1&query=${loc.query}" target="_blank" style="font-size:0.72rem; color:#2563eb; text-decoration:none; display:inline-block; margin-top:4px;">🧭 Open in Google Maps</a>
         `);
         markers.push(marker);
@@ -622,7 +641,7 @@
       container.innerHTML = '';
 
       const filtered = locations.filter(loc => dayFilter === 'all' || loc.day === dayFilter);
-      const completedState = JSON.parse(localStorage.getItem('rockies_completed_v6') || '{}');
+      const completedState = JSON.parse(localStorage.getItem('rockies_completed_v7') || '{}');
 
       filtered.forEach(loc => {
         const isChecked = !!completedState[loc.id];
@@ -656,6 +675,7 @@
           <div class="meta-row">
             <span class="time-badge">⏰ ${loc.time}</span>
             <span class="duration-badge">⏱️ ${loc.duration}</span>
+            <span class="temp-badge">🌡️ ${loc.temp}</span>
             <span class="hours-badge">🏛️ ${loc.hours}</span>
           </div>
           ${warningHtml}
@@ -674,9 +694,9 @@
     }
 
     function toggleComplete(id) {
-      const completedState = JSON.parse(localStorage.getItem('rockies_completed_v6') || '{}');
+      const completedState = JSON.parse(localStorage.getItem('rockies_completed_v7') || '{}');
       completedState[id] = !completedState[id];
-      localStorage.setItem('rockies_completed_v6', JSON.stringify(completedState));
+      localStorage.setItem('rockies_completed_v7', JSON.stringify(completedState));
       
       const card = document.getElementById(`card-${id}`);
       if (card) {
@@ -690,7 +710,7 @@
     }
 
     function updateProgressBar() {
-      const completedState = JSON.parse(localStorage.getItem('rockies_completed_v6') || '{}');
+      const completedState = JSON.parse(localStorage.getItem('rockies_completed_v7') || '{}');
       const total = locations.length;
       const completedCount = locations.filter(loc => completedState[loc.id]).length;
       const pct = Math.round((completedCount / total) * 100);
@@ -724,27 +744,25 @@
       setTimeout(() => {
         if (query.includes('day 3') || query.includes('sequence')) {
           output.innerHTML = `<strong>Day 3 Sequence (Oct 02):</strong><br/>
-          1. Depart Golden (8:30 AM PDT)<br/>
-          2. Natural Bridge Lower Falls (9:15 AM PDT / 10:15 AM MDT)<br/>
-          3. Emerald Lake Stroll (10:50 AM MDT)<br/>
-          4. Banff Gondola - Sulphur Mountain (1:15 PM MDT)<br/>
-          5. Cave and Basin Historic Site (3:30 PM MDT - before 5 PM close)<br/>
+          1. Depart Golden (8:30 AM MDT)<br/>
+          2. Natural Bridge Lower Falls (9:15 AM MDT)<br/>
+          3. Emerald Lake Stroll (10:20 AM MDT)<br/>
+          4. Banff Gondola - Sulphur Mountain (12:45 PM MDT)<br/>
+          5. Cave and Basin Historic Site (3:15 PM MDT - before 5 PM close)<br/>
           6. Banff Downtown, Nourish Bistro & Cascade Gardens (4:45 PM MDT)<br/>
           7. Drive to Calgary Residence (7:00 PM MDT)`;
-        } else if (query.includes('gondola') || query.includes('sulphur')) {
-          output.innerHTML = `<strong>Banff Gondola Details:</strong><br/>
-          • <strong>Location:</strong> 100 Mountain Ave, Banff AB.<br/>
-          • <strong>Time:</strong> Day 3 at 01:15 PM MDT.<br/>
-          • <strong>Accessibility:</strong> Wheelchair/Senior friendly. Enclosed cabins, elevators & indoor summit terminal.`;
+        } else if (query.includes('timezone') || query.includes('time')) {
+          output.innerHTML = `<strong>Timezone Summary:</strong><br/>
+          All stops (including Golden, BC) are on Mountain Time (MDT). Your clock does not need to change throughout the entire trip.`;
         } else if (query.includes('veg') || query.includes('food') || query.includes('dinner')) {
           output.innerHTML = `<strong>Key Vegetarian Dining Spot Highlights:</strong><br/>
           • <strong>Day 1 (Golden):</strong> Whitetooth Bistro (Tofu bowls, veg burgers).<br/>
           • <strong>Day 2 (Golden):</strong> Indian Kitchen Golden (Paneer Butter Masala, Dal Makhani).<br/>
           • <strong>Day 3 (Banff):</strong> Nourish Bistro Banff (100% Veggie Nachos & Curry Bowls).`;
-        } else if (query.includes('weather') || query.includes('cloth') || query.includes('cold')) {
+        } else if (query.includes('weather') || query.includes('cloth') || query.includes('cold') || query.includes('temp')) {
           output.innerHTML = `<strong>Weather Guidance:</strong><br/>
           • <strong>Day 1:</strong> 8°C High / 0°C Low.<br/>
-          • <strong>Day 2 (Icefields):</strong> Sub-zero (-3°C wind chill). Gloves, beanie & winter coat needed!<br/>
+          • <strong>Day 2 (Icefields):</strong> Sub-zero (-3°C wind chill on glacier). Gloves, beanie & winter coat needed!<br/>
           • <strong>Day 3:</strong> 11°C High / 1°C Low. Summit of Sulphur Mountain requires windbreakers.`;
         } else {
           output.innerHTML = `<strong>General Travel Info:</strong><br/>
