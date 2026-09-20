@@ -1,447 +1,871 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Banff & Jasper Complete Travel Guide</title>
-    <style>
-        :root {
-            --primary: #1e3a8a;
-            --primary-light: #3b82f6;
-            --accent: #d97706;
-            --bg-light: #f8fafc;
-            --card-bg: #ffffff;
-            --text-main: #0f172a;
-            --text-muted: #475569;
-            --border: #e2e8f0;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Canadian Rockies Itinerary Dashboard v7</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#1e3a8a" />
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: var(--bg-light);
-            color: var(--text-main);
-            line-height: 1.6;
-        }
+  <!-- Leaflet CSS for Map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
-        .header {
-            background-color: var(--primary);
-            color: white;
-            padding: 2rem 1rem;
-            text-align: center;
-        }
+  <style>
+    :root {
+      --primary: #1e3a8a;
+      --secondary: #0284c7;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --success: #22c55e;
+      --day1-color: #2563eb;
+      --day2-color: #ea580c;
+      --day3-color: #16a34a;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); padding-bottom: 90px; }
 
-        .header h1 {
-            margin: 0 0 0.5rem 0;
-            font-size: 2.2rem;
-        }
+    header { background: var(--primary); color: white; padding: 12px 16px; text-align: center; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    header h1 { font-size: 1.15rem; font-weight: 700; }
 
-        .header p {
-            margin: 0;
-            color: #93c5fd;
-            font-size: 1.1rem;
-        }
+    .progress-container { background: rgba(255, 255, 255, 0.2); border-radius: 10px; height: 8px; width: 85%; margin: 6px auto 0; overflow: hidden; }
+    .progress-bar { background: var(--success); height: 100%; width: 0%; transition: width 0.3s ease; }
+    .progress-text { font-size: 0.7rem; font-weight: 600; margin-top: 4px; color: #e0f2fe; }
 
-        .container {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 1.5rem 1rem;
-        }
+    .map-wrapper { position: relative; width: 100%; }
+    #map { height: 320px; width: 100%; z-index: 1; }
+    
+    .map-legend {
+      position: absolute; bottom: 12px; right: 12px; z-index: 500;
+      background: rgba(255, 255, 255, 0.94); backdrop-filter: blur(4px);
+      padding: 8px 10px; border-radius: 8px; font-size: 0.7rem; font-weight: 600;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2); border: 1px solid #cbd5e1;
+    }
+    .legend-item { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; }
+    .legend-item:last-child { margin-bottom: 0; }
+    .legend-color { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
 
-        .nav-tabs {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            border-bottom: 2px solid var(--border);
-            margin-bottom: 1.5rem;
-        }
+    /* Custom Map Markers with Numbers */
+    .map-num-pin {
+      background-color: var(--day1-color);
+      color: white; border: 2px solid white;
+      border-radius: 50%; font-weight: bold; font-size: 11px;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3); width: 22px; height: 22px;
+    }
 
-        .tab-btn {
-            background: none;
-            border: none;
-            padding: 0.75rem 1.25rem;
-            font-size: 1rem;
-            font-weight: 600;
-            color: var(--text-muted);
-            cursor: pointer;
-            border-bottom: 3px solid transparent;
-            transition: all 0.2s ease;
-        }
+    .filter-bar { display: flex; overflow-x: auto; background: white; padding: 8px 12px; gap: 8px; border-bottom: 1px solid #e2e8f0; -webkit-overflow-scrolling: touch; }
+    .filter-btn { border: none; padding: 6px 14px; border-radius: 20px; background: #e2e8f0; color: #475569; font-weight: 600; font-size: 0.75rem; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
+    .filter-btn.active { background: var(--secondary); color: white; }
+    .filter-btn.day1-btn.active { background: var(--day1-color); }
+    .filter-btn.day2-btn.active { background: var(--day2-color); }
+    .filter-btn.day3-btn.active { background: var(--day3-color); }
+    .filter-btn.bookings-btn.active { background: var(--primary); }
 
-        .tab-btn:hover {
-            color: var(--primary-light);
-        }
+    .container { padding: 12px; max-width: 800px; margin: 0 auto; }
 
-        .tab-btn.active {
-            color: var(--primary);
-            border-bottom-color: var(--primary);
-        }
+    .weather-card { background: #e0f2fe; border-left: 4px solid var(--secondary); padding: 10px 12px; margin-bottom: 10px; border-radius: 6px; font-size: 0.78rem; color: #0369a1; }
+    .weather-card strong { display: block; margin-bottom: 2px; color: #075985; }
 
-        .tab-content {
-            display: none;
-        }
+    .alert-card { background: #fef3c7; border-left: 4px solid var(--warning); padding: 10px 12px; margin-bottom: 12px; border-radius: 6px; font-size: 0.78rem; }
+    .alert-card strong { display: block; margin-bottom: 2px; color: #92400e; }
 
-        .tab-content.active {
-            display: block;
-        }
+    .tz-card { background: #f3e8ff; border: 1px solid #d8b4fe; padding: 8px 12px; border-radius: 8px; font-size: 0.75rem; color: #6b21a8; margin-bottom: 12px; }
 
-        .card {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
+    .parent-care-card { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 10px 12px; margin-bottom: 12px; font-size: 0.76rem; line-height: 1.45; }
+    .parent-care-card h4 { color: #166534; font-size: 0.82rem; margin-bottom: 4px; }
 
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 0.75rem;
-            margin-bottom: 1rem;
-        }
+    .itinerary-item { background: var(--card-bg); border-radius: 10px; padding: 14px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border-left: 5px solid var(--secondary); }
+    .itinerary-item.day-0 { border-left-color: #64748b; }
+    .itinerary-item.day-1 { border-left-color: var(--day1-color); }
+    .itinerary-item.day-2 { border-left-color: var(--day2-color); }
+    .itinerary-item.day-3 { border-left-color: var(--day3-color); }
+    .itinerary-item.day-bookings { border-left-color: var(--primary); }
+    .itinerary-item.completed { opacity: 0.6; background: #f1f5f9; border-left-color: var(--success); }
+    .itinerary-item.completed h3 { text-decoration: line-through; color: #64748b; }
 
-        .card-title {
-            margin: 0;
-            font-size: 1.3rem;
-            color: var(--primary);
-        }
+    .item-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px; }
+    .itinerary-item h3 { font-size: 0.95rem; color: var(--primary); flex: 1; padding-right: 6px; }
 
-        .badge {
-            background-color: #e0e7ff;
-            color: #3730a3;
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
-            font-size: 0.85rem;
-            font-weight: 600;
-        }
+    .checkbox-container { display: flex; align-items: center; gap: 4px; cursor: pointer; font-size: 0.75rem; font-weight: 600; color: #475569; }
+    .checkbox-container input { display: none; }
+    .checkmark { height: 20px; width: 20px; background-color: #eee; border-radius: 5px; display: inline-block; position: relative; border: 1px solid #cbd5e1; }
+    .checkbox-container input:checked ~ .checkmark { background-color: var(--success); border-color: var(--success); }
+    .checkmark:after { content: ""; position: absolute; display: none; left: 6px; top: 2px; width: 4px; height: 9px; border: solid white; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+    .checkbox-container input:checked ~ .checkmark:after { display: block; }
 
-        .badge.alert {
-            background-color: #fef3c7;
-            color: #92400e;
-        }
+    .meta-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+    .time-badge { font-size: 0.73rem; background: #eff6ff; color: #1d4ed8; padding: 3px 8px; border-radius: 4px; font-weight: 700; border: 1px solid #bfdbfe; }
+    .duration-badge { font-size: 0.73rem; background: #fef2f2; color: #dc2626; padding: 3px 8px; border-radius: 4px; font-weight: 700; border: 1px solid #fecaca; }
+    .temp-badge { font-size: 0.73rem; background: #e0f2fe; color: #0369a1; padding: 3px 8px; border-radius: 4px; font-weight: 700; border: 1px solid #bae6fd; }
+    .hours-badge { font-size: 0.73rem; background: #fef3c7; color: #92400e; padding: 3px 8px; border-radius: 4px; font-weight: 700; border: 1px solid #fde68a; }
 
-        .timeline {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
+    .step-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; font-size: 0.78rem; color: #334155; line-height: 1.45; margin-bottom: 8px; }
+    .step-box ul { padding-left: 16px; margin-top: 4px; }
+    .step-box li { margin-bottom: 3px; }
 
-        .timeline-item {
-            position: relative;
-            padding-left: 2rem;
-            margin-bottom: 1.25rem;
-        }
+    .warning-box { background: #fff1f2; border: 1px solid #fecdd3; border-radius: 6px; padding: 8px 10px; font-size: 0.75rem; color: #9f1239; margin-bottom: 8px; font-weight: 500; }
 
-        .timeline-item::before {
-            content: '';
-            position: absolute;
-            left: 0.5rem;
-            top: 0.35rem;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background-color: var(--primary-light);
-        }
+    .parking-badge { background: #f1f5f9; color: #334155; padding: 4px 8px; border-radius: 4px; font-size: 0.73rem; margin-bottom: 6px; display: inline-block; border: 1px solid #e2e8f0; }
+    .veg-badge { background: #f0fdf4; color: #166534; padding: 6px 10px; border-radius: 6px; font-size: 0.75rem; margin-bottom: 8px; border: 1px solid #bbf7d0; display: block; }
 
-        .timeline-item::after {
-            content: '';
-            position: absolute;
-            left: 0.75rem;
-            top: 1.25rem;
-            width: 2px;
-            height: calc(100% - 0.5rem);
-            background-color: var(--border);
-        }
+    .nav-btn { display: inline-flex; align-items: center; gap: 4px; background: #22c55e; color: white; text-decoration: none; padding: 6px 12px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }
+    .nav-btn.official-link { background: var(--primary); }
 
-        .timeline-item:last-child::after {
-            display: none;
-        }
-
-        .time-label {
-            font-weight: 700;
-            color: var(--primary);
-            margin-bottom: 0.25rem;
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .btn-link {
-            display: inline-block;
-            background-color: var(--primary);
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 0.9rem;
-            margin-top: 0.75rem;
-            transition: background-color 0.2s;
-        }
-
-        .btn-link:hover {
-            background-color: var(--primary-light);
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 1rem;
-        }
-
-        th, td {
-            text-align: left;
-            padding: 0.75rem;
-            border-bottom: 1px solid var(--border);
-        }
-
-        th {
-            background-color: var(--bg-light);
-            color: var(--text-muted);
-            font-weight: 600;
-        }
-
-        @media (max-width: 600px) {
-            .nav-tabs {
-                flex-direction: column;
-            }
-            .card-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 0.5rem;
-            }
-        }
-    </style>
+    .ai-fab { position: fixed; bottom: 18px; right: 18px; background: var(--primary); color: white; border: none; padding: 12px 18px; border-radius: 30px; font-weight: bold; font-size: 0.85rem; box-shadow: 0 4px 12px rgba(0,0,0,0.25); cursor: pointer; z-index: 1001; }
+    .ai-modal { display: none; position: fixed; bottom: 75px; right: 16px; left: 16px; max-width: 420px; margin: 0 auto; background: white; border-radius: 14px; padding: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.25); z-index: 1002; border: 1px solid #cbd5e1; }
+    .ai-modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .ai-modal-header h3 { font-size: 0.9rem; color: var(--primary); }
+    .ai-close-btn { background: #f1f5f9; border: none; font-size: 1.1rem; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; color: #64748b; display: flex; align-items: center; justify-content: center; }
+    .ai-modal textarea { width: 100%; height: 65px; border: 1px solid #cbd5e1; border-radius: 6px; padding: 8px; margin-bottom: 8px; font-size: 0.8rem; }
+    .ai-modal button.submit-btn { background: var(--secondary); color: white; border: none; width: 100%; padding: 8px; border-radius: 6px; font-weight: 600; font-size: 0.85rem; cursor: pointer; }
+    .ai-response { margin-top: 8px; font-size: 0.78rem; max-height: 180px; overflow-y: auto; background: #f8fafc; padding: 8px; border-radius: 6px; line-height: 1.4; border: 1px solid #e2e8f0; }
+  </style>
 </head>
 <body>
 
-    <div class="header">
-        <h1>Banff & Jasper Canadian Rockies Guide</h1>
-        <p>Complete Itinerary & Official Reservation Portal</p>
+  <header>
+    <h1>Calgary & Banff Expedition v7</h1>
+    <div class="progress-container">
+      <div id="progress-bar" class="progress-bar"></div>
+    </div>
+    <div id="progress-text" class="progress-text">Trip Progress: 0/17 Completed (0%)</div>
+  </header>
+
+  <div class="map-wrapper">
+    <div id="map"></div>
+    <div class="map-legend">
+      <div class="legend-item"><span class="legend-color" style="background:#2563eb;"></span> Day 1 (Sep 30)</div>
+      <div class="legend-item"><span class="legend-color" style="background:#ea580c;"></span> Day 2 (Oct 01)</div>
+      <div class="legend-item"><span class="legend-color" style="background:#16a34a;"></span> Day 3 (Oct 02)</div>
+      <div class="legend-item"><span class="legend-color" style="background:#1e3a8a;"></span> Accommodations / Airport</div>
+    </div>
+  </div>
+
+  <div class="filter-bar">
+    <button class="filter-btn active" onclick="filterDay('all')">All Days</button>
+    <button class="filter-btn bookings-btn" onclick="filterDay('bookings')">🎟️ Bookings & Reservations</button>
+    <button class="filter-btn" onclick="filterDay(0)">Sep 29 (Day 0)</button>
+    <button class="filter-btn day1-btn" onclick="filterDay(1)">Sep 30 (Day 1)</button>
+    <button class="filter-btn day2-btn" onclick="filterDay(2)">Oct 01 (Day 2)</button>
+    <button class="filter-btn day3-btn" onclick="filterDay(3)">Oct 02 (Day 3)</button>
+    <button class="filter-btn" onclick="filterDay(4)">Oct 03-04</button>
+  </div>
+
+  <div class="container">
+
+    <!-- Timezone Notice -->
+    <div class="tz-card">
+      <strong>🕒 Uniform Timezone Note:</strong> Golden, BC operates on <strong>Mountain Time (MDT)</strong>, remaining in lockstep with Calgary, Banff, Yoho, and Lake Louise. No clock adjustments or border time-shifts needed!
     </div>
 
-    <div class="container">
-        <!-- Navigation Tabs -->
-        <div class="nav-tabs">
-            <button class="tab-btn active" onclick="switchTab(event, 'tab-bookings')">Bookings & Reservations</button>
-            <button class="tab-btn" onclick="switchTab(event, 'tab-day1')">Day 1: Banff Town & Lakes</button>
-            <button class="tab-btn" onclick="switchTab(event, 'tab-day2')">Day 2: Lake Louise & Moraine</button>
-            <button class="tab-btn" onclick="switchTab(event, 'tab-day3')">Day 3: Icefields Parkway</button>
-            <button class="tab-btn" onclick="switchTab(event, 'tab-day4')">Day 4: Jasper & Maligne</button>
-        </div>
-
-        <!-- TAB: Bookings & Reservations -->
-        <div id="tab-bookings" class="tab-content active">
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title">Essential Parks Canada Services</h2>
-                    <span class="badge">Government Official</span>
-                </div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Item / Service</th>
-                            <th>Release Deadlines & Rules</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><strong>Parks Canada Discovery Pass</strong><br><small>National Park Entry Pass</small></td>
-                            <td>Buy anytime before travel or at national park entry gates. Valid for 1 full year.</td>
-                            <td><a href="https://parkscanadashop.ca/pages/discovery-pass" target="_blank" class="btn-link">Buy Pass</a></td>
-                        </tr>
-                        <tr>
-                            <td><strong>Lake Louise & Moraine Lake Shuttles</strong><br><small>Parks Canada Shuttle System</small></td>
-                            <td>
-                                <ul>
-                                    <li><strong>40% Release:</strong> Mid-April at 8:00 AM MT.</li>
-                                    <li><strong>60% Rolling Release:</strong> Exactly <strong>48 hours prior</strong> to departure date at 8:00 AM MT.</li>
-                                </ul>
-                            </td>
-                            <td><a href="https://reservation.pc.gc.ca/" target="_blank" class="btn-link">Reserve Shuttle</a></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="grid">
-                <div class="card">
-                    <div class="card-header">
-                        <h2 class="card-title">Attractions & Excursions</h2>
-                        <span class="badge alert">Advance Booking Required</span>
-                    </div>
-                    <ul class="timeline">
-                        <li class="timeline-item">
-                            <div class="time-label">Columbia Icefield Glacier Adventure</div>
-                            <p>Includes Ice Explorer ride onto Athabasca Glacier & Glass Skywalk entry. Dynamic pricing; book 2-4 weeks ahead.</p>
-                            <a href="https://www.banffjaspercollection.com/attractions/columbia-icefield-adventure/tickets/" target="_blank" class="btn-link">Book Icefield Tickets</a>
-                        </li>
-                        <li class="timeline-item">
-                            <div class="time-label">Banff Gondola (Sulphur Mountain)</div>
-                            <p>Timed-entry gondola ride. Evening/sunset slots fill fast; book 1-2 weeks in advance.</p>
-                            <a href="https://www.banffjaspercollection.com/attractions/banff-gondola/" target="_blank" class="btn-link">Book Banff Gondola</a>
-                        </li>
-                        <li class="timeline-item">
-                            <div class="time-label">Maligne Lake Boat Cruise (Jasper)</div>
-                            <p>90-minute scenic cruise to Spirit Island. Runs late May through October.</p>
-                            <a href="https://www.banffjaspercollection.com/attractions/maligne-lake-cruise/" target="_blank" class="btn-link">Book Maligne Cruise</a>
-                        </li>
-                    </ul>
-                </div>
-
-                <div class="card">
-                    <div class="card-header">
-                        <h2 class="card-title">Transit Options (Roam Transit)</h2>
-                        <span class="badge">Local Bus System</span>
-                    </div>
-                    <p>Alternative to Parks Canada shuttles for reaching Lake Louise and Moraine Lake directly from Banff Town.</p>
-                    <ul class="timeline">
-                        <li class="timeline-item">
-                            <div class="time-label">Route 8X (Banff to Lake Louise Express)</div>
-                            <p>Reservable online starting May. Highly recommended during peak summer months.</p>
-                        </li>
-                        <li class="timeline-item">
-                            <div class="time-label">Route 10 (Moraine Lake Express)</div>
-                            <p>Runs seasonally from Banff directly to Moraine Lake. Direct reservations required.</p>
-                        </li>
-                    </ul>
-                    <a href="https://roamtransit.com/" target="_blank" class="btn-link">Visit Roam Transit</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- TAB: Day 1 -->
-        <div id="tab-day1" class="tab-content">
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title">Day 1: Banff Townsite & Surrounding Lakes</h2>
-                    <span class="badge">Driving: ~45 mins total</span>
-                </div>
-                <ul class="timeline">
-                    <li class="timeline-item">
-                        <div class="time-label">08:00 AM - Morning Hike: Tunnel Mountain or Johnston Canyon</div>
-                        <p>Start early to beat the crowd. Johnston Canyon features lower/upper falls catwalks.</p>
-                    </li>
-                    <li class="timeline-item">
-                        <div class="time-label">12:00 PM - Lunch & Explore Banff Avenue</div>
-                        <p>Stroll downtown Banff, visit local bakeries, shops, and the Banff Park Museum.</p>
-                    </li>
-                    <li class="timeline-item">
-                        <div class="time-label">03:00 PM - Lake Minnewanka & Two Jack Lake Loop</div>
-                        <p>15-minute drive from town. Perfect for short lakeside walks or an afternoon boat ride.</p>
-                    </li>
-                    <li class="timeline-item">
-                        <div class="time-label">06:00 PM - Banff Gondola Sunset & Dinner</div>
-                        <p>Ride to Sulphur Mountain summit for panoramic view over the Bow Valley.</p>
-                    </li>
-                </ul>
-            </div>
-        </div>
-
-        <!-- TAB: Day 2 -->
-        <div id="tab-day2" class="tab-content">
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title">Day 2: Lake Louise & Moraine Lake</h2>
-                    <span class="badge">Park & Ride Shuttle Required</span>
-                </div>
-                <ul class="timeline">
-                    <li class="timeline-item">
-                        <div class="time-label">06:30 AM - Arrive at Park & Ride (Lake Louise Ski Resort)</div>
-                        <p>Board booked Parks Canada Shuttle to Moraine Lake first for calm morning light on the Ten Peaks.</p>
-                    </li>
-                    <li class="timeline-item">
-                        <div class="time-label">07:00 AM - Moraine Lake & Rockpile Trail</div>
-                        <p>Walk up the Rockpile Trail for the iconic turquoise lake perspective.</p>
-                    </li>
-                    <li class="timeline-item">
-                        <div class="time-label">10:30 AM - Lake Connector Shuttle to Lake Louise</div>
-                        <p>Use the free connector shuttle between Moraine Lake and Lake Louise (included in shuttle ticket).</p>
-                    </li>
-                    <li class="timeline-item">
-                        <div class="time-label">11:30 AM - Lake Shore Trail & Tea House Hike</div>
-                        <p>Hike to Lake Agnes Tea House (3.5 km, moderate) or Plain of Six Glaciers.</p>
-                    </li>
-                </ul>
-            </div>
-        </div>
-
-        <!-- TAB: Day 3 -->
-        <div id="tab-day3" class="tab-content">
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title">Day 3: Icefields Parkway Drive (Banff to Jasper)</h2>
-                    <span class="badge">Driving: ~230 km (3.5 - 5 hrs with stops)</span>
-                </div>
-                <ul class="timeline">
-                    <li class="timeline-item">
-                        <div class="time-label">08:00 AM - Departure & Peyto Lake</div>
-                        <p>Stop at Bow Lake and hike up to the Bow Summit lookout for Peyto Lake's dog-head view.</p>
-                    </li>
-                    <li class="timeline-item">
-                        <div class="time-label">11:30 AM - Columbia Icefield Center</div>
-                        <p>Experience the Ice Explorer Athabasca Glacier Tour and walk the glass Skywalk.</p>
-                    </li>
-                    <li class="timeline-item">
-                        <div class="time-label">03:30 PM - Waterfalls Route</div>
-                        <p>Stop at Sunwapta Falls and Athabasca Falls along Hwy 93 into Jasper.</p>
-                    </li>
-                    <li class="timeline-item">
-                        <div class="time-label">06:00 PM - Arrive in Jasper Townsite</div>
-                        <p>Check-in to accommodation and enjoy dinner in downtown Jasper.</p>
-                    </li>
-                </ul>
-            </div>
-        </div>
-
-        <!-- TAB: Day 4 -->
-        <div id="tab-day4" class="tab-content">
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title">Day 4: Jasper Lakes & Maligne Valley</h2>
-                    <span class="badge">Driving: ~1.5 hrs roundtrip</span>
-                </div>
-                <ul class="timeline">
-                    <li class="timeline-item">
-                        <div class="time-label">08:30 AM - Maligne Canyon Hike</div>
-                        <p>Explore deep limestone canyon bridges and cascading waterfalls.</p>
-                    </li>
-                    <li class="timeline-item">
-                        <div class="time-label">11:00 AM - Medicine Lake & Maligne Lake Cruise</div>
-                        <p>Drive past Medicine Lake to Maligne Lake for a boat cruise to Spirit Island.</p>
-                    </li>
-                    <li class="timeline-item">
-                        <div class="time-label">03:30 PM - Pyramid & Patricia Lakes</div>
-                        <p>Relax, rent a kayak, or stroll across the wooden bridge to Pyramid Island.</p>
-                    </li>
-                </ul>
-            </div>
-        </div>
+    <!-- Weather Summary Box -->
+    <div id="weather-card" class="weather-card">
+      <strong>🌤️ Daily Weather & Clothing Summary:</strong>
+      • <strong>Day 1 (Lake Louise & Yoho):</strong> High 8°C / Low 0°C. Cool morning, wear fleece.<br/>
+      • <strong>Day 2 (Icefields Parkway):</strong> High 2°C / Low -3°C. Sub-zero wind chill on glacier! Thermals, gloves & beanies required.<br/>
+      • <strong>Day 3 (Yoho & Banff):</strong> High 11°C / Low 1°C. Crisp & pleasant afternoon. Windbreaker needed for Sulphur Mountain summit.
     </div>
 
-    <script>
-        function switchTab(evt, tabId) {
-            var contents = document.getElementsByClassName("tab-content");
-            for (var i = 0; i < contents.length; i++) {
-                contents[i].classList.remove("active");
-            }
+    <!-- Parent & Senior Care Guidelines -->
+    <div id="parent-card" class="parent-care-card">
+      <h4>👴 Parents & Senior Care Considerations</h4>
+      • <strong>Restroom Access:</strong> Available at Park & Ride, Moraine Lake Lodge, Lake Louise Lakeshore, Columbia Icefield Centre, Natural Bridge, Emerald Lake Lodge, Banff Gondola Terminal, and Banff Ave.<br/>
+      • <strong>Pacing & Mobility:</strong> Natural Bridge and Emerald Lake feature flat, paved/wooden paths directly adjacent to parking. Banff Gondola is fully senior-accessible with elevators and enclosed 4-passenger cabins.
+    </div>
 
-            var buttons = document.getElementsByClassName("tab-btn");
-            for (var i = 0; i < buttons.length; i++) {
-                buttons[i].classList.remove("active");
-            }
+    <!-- Alert Banner -->
+    <div id="prep-alert" class="alert-card">
+      <strong>⚠️ Next-Day Preparation Reminders</strong>
+      Keep Parks Canada Pass displayed on vehicle windshield. Download offline Google Maps for Calgary, Banff, Yoho, and Jasper.
+    </div>
 
-            document.getElementById(tabId).classList.add("active");
-            evt.currentTarget.classList.add("active");
+    <!-- Itinerary Items List -->
+    <div id="itinerary-list"></div>
+
+  </div>
+
+  <!-- AI Button & Modal -->
+  <button class="ai-fab" onclick="toggleAiModal()">✨ Ask AI Assistant</button>
+  <div id="ai-modal" class="ai-modal">
+    <div class="ai-modal-header">
+      <h3>Gemini Itinerary Assistant</h3>
+      <button class="ai-close-btn" onclick="toggleAiModal()">✕</button>
+    </div>
+    <p style="font-size: 0.72rem; color: #64748b; margin-bottom: 6px;">Ask questions about schedule, weather, timezones, or veg food:</p>
+    <textarea id="ai-input" placeholder="e.g. What is the sequence for Day 3? Where is Banff Gondola?"></textarea>
+    <button class="submit-btn" onclick="askGemini()">Ask Assistant</button>
+    <div id="ai-output" class="ai-response" style="display:none;"></div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js').catch(() => console.log('SW registration skipped offline'));
+    }
+
+    const bookingsData = [
+      {
+        id: "b_1", day: "bookings", seq: "B1", title: "1. Parks Canada Discovery Pass (National Park Entry)",
+        time: "Valid 1 Full Year", duration: "Annual Pass",
+        temp: "Government Entry Pass", hours: "Required for All Parks",
+        warning: "⚠️ Display Requirement: Must print pass and leave on SUV windshield driver side dashboard.",
+        desc: "Covers entry into Banff, Yoho, and Jasper National Parks for all vehicle passengers.",
+        steps: [
+          "Buy online via official Parks Canada Shop before travel or purchase at entry gates.",
+          "Print pass prior to travel and fold as directed.",
+          "Place visibly on SUV dashboard when parked inside national parks."
+        ],
+        parking: "Applies to all National Park Parking Lots",
+        url: "https://parkscanadashop.ca/pages/discovery-pass",
+        linkText: "🔗 Parks Canada Pass Portal"
+      },
+      {
+        id: "b_2", day: "bookings", seq: "B2", title: "2. Parks Canada Lake Louise & Moraine Lake Shuttle",
+        time: "10:00 - 11:00 AM Departure Window", duration: "Timed Shuttle Window",
+        temp: "Reservation Deadlines Apply", hours: "Lake Louise Ski Resort Lot",
+        warning: "⚠️ Rolling Deadline Rule: 60% of seats release exactly 48 hours prior to departure date at 8:00 AM MT.",
+        desc: "Mandatory shuttle reservation to visit Moraine Lake and Lake Louise from Park & Ride lot.",
+        steps: [
+          "Initial Release: 40% of season tickets release mid-April at 8:00 AM MT.",
+          "Rolling 48-Hour Deadline: Remaining 60% release 48 hours before travel at 8:00 AM MT.",
+          "Ticket includes initial Lake shuttle + free Lake Connector shuttle between Moraine Lake & Lake Louise."
+        ],
+        parking: "Park & Ride Lot (Lake Louise Ski Resort)",
+        url: "https://reservation.pc.gc.ca/",
+        linkText: "🔗 Parks Canada Reservation Service"
+      },
+      {
+        id: "b_3", day: "bookings", seq: "B3", title: "3. Columbia Icefield Glacier Adventure & Skywalk",
+        time: "11:30 AM – 02:30 PM MDT", duration: "3 Hours Tour Window",
+        temp: "Sub-Zero Glacier Surface", hours: "Advance Booking Recommended",
+        warning: "⚠️ Booking Deadline: Dynamic pricing applies. Book 2–4 weeks in advance to secure desired timed-entry slot.",
+        desc: "Includes Ice Explorer vehicle ride onto Athabasca Glacier and Columbia Icefield Skywalk access.",
+        steps: [
+          "Select timed entry slot for Columbia Icefield Glacier Adventure.",
+          "Check in at Discovery Centre desk 15 mins prior to reservation time.",
+          "Dress in thermal layers, winter coat, beanie, and gloves for glacier visit."
+        ],
+        parking: "Columbia Icefield Discovery Centre Main Lot",
+        url: "https://www.banffjaspercollection.com/attractions/columbia-icefield-adventure/tickets/",
+        linkText: "🔗 Pursuit Icefield Official Booking"
+      },
+      {
+        id: "b_4", day: "bookings", seq: "B4", title: "4. Banff Gondola (Sulphur Mountain Summit)",
+        time: "12:45 PM – 03:00 PM MDT", duration: "2 Hours 15 Mins Window",
+        temp: "Breezy Summit Terminal", hours: "9:00 AM – 9:00 PM MDT",
+        warning: "⚠️ Reservation Deadline: Sunset and peak afternoon times sell out. Book 1–2 weeks in advance online.",
+        desc: "Timed entry gondola tickets for 4-passenger enclosed cabin ride up Sulphur Mountain.",
+        steps: [
+          "Choose desired summit departure time slot online.",
+          "Scan mobile ticket at base terminal turnstiles (100 Mountain Ave).",
+          "Enjoy summit boardwalk, indoor multi-sensory theatre, and observation deck."
+        ],
+        parking: "Banff Gondola Base Parking Lot",
+        url: "https://www.banffjaspercollection.com/attractions/banff-gondola/",
+        linkText: "🔗 Pursuit Banff Gondola Booking"
+      }
+    ];
+
+    const locations = [
+      // Day 0
+      {
+        id: "d0_1", day: 0, seq: 1, title: "1. Flight AA1632 Arrival & SUV Pickup",
+        lat: 51.1215, lng: -114.0076,
+        time: "11:29 PM – 12:30 AM MDT (Sep 29)", duration: "1 hour 01 min",
+        temp: "Night 6°C (Cool)",
+        hours: "24 Hours Airport Access", warning: null,
+        desc: "Land at YYC airport at 11:29 PM. Collect baggage, retrieve rental SUV, and load luggage.",
+        steps: ["Arrive YYC terminal", "Claim luggage at Level 1", "Walk to Car Rental Centre", "Complete rental paperwork and load SUV"],
+        parking: "YYC Rental Car Drop-Off/Pick-Up Garage",
+        vegFood: null, query: "Calgary+International+Airport"
+      },
+      {
+        id: "d0_2", day: 0, seq: 2, title: "2. Drive to Calgary Stay",
+        lat: 50.8996, lng: -114.0954,
+        time: "12:30 AM – 01:05 AM MDT (Sep 30 Overnight)", duration: "35 mins drive",
+        temp: "Night 5°C",
+        hours: "Private Residence Check-in", warning: null,
+        desc: "Drive directly from YYC Airport to Calgary residence.",
+        steps: ["Take AB-2 S / Deerfoot Trail S", "Drive 38 km directly to 66 Silverado Skies Dr SW", "Park SUV and check in for sleep"],
+        parking: "Driveway/Street parking at 66 Silverado Skies Dr SW",
+        vegFood: null, query: "66+Silverado+Skies+Dr+SW+Calgary+AB"
+      },
+
+      // Day 1
+      {
+        id: "d1_0", day: 1, seq: 1, title: "1. Depart Calgary Residence → Park & Ride",
+        lat: 50.8996, lng: -114.0954,
+        time: "08:00 AM – 10:00 AM MDT (Sep 30)", duration: "2 hours drive (184 km)",
+        temp: "Morning 3°C to 6°C",
+        hours: "Park & Ride Lot Open 24/7", warning: null,
+        desc: "Depart Calgary residence at 8:00 AM MDT to drive West to Lake Louise Park & Ride.",
+        steps: [
+          "08:00 AM MDT: Depart 66 Silverado Skies Dr SW, Calgary AB in rental SUV",
+          "Drive West via Trans-Canada Hwy / AB-1 W",
+          "10:00 AM MDT: Arrive at Park & Ride (Lake Louise Ski Resort Lot)",
+          "Park rental SUV in the designated shuttle parking area"
+        ],
+        parking: "Park & Ride Lot (Lake Louise Ski Resort - Free Parking)",
+        vegFood: "Breakfast: Trailhead Cafe (Lake Louise Village) - Hot coffee & veg breakfast burritos.",
+        query: "Lake+Louise+Park+and+Ride"
+      },
+      {
+        id: "d1_1", day: 1, seq: 2, title: "2. Shuttle to Moraine Lake & Rockpile Trail",
+        lat: 51.3217, lng: -116.1860,
+        time: "10:15 AM – 12:45 PM MDT", duration: "2 hours 30 mins",
+        temp: "Daytime 5°C to 8°C (Fleece/Jacket)",
+        hours: "Shuttle Reservation Valid 10:00-11:00 AM Window",
+        warning: "⚠️ Note for Parents: Rockpile trail has steep stairs. Benches are available at the base along shoreline.",
+        desc: "Board Parks Canada Shuttle from Park & Ride to Moraine Lake. Explore Rockpile trail and lakefront.",
+        steps: [
+          "10:15 AM MDT: Board Parks Canada Shuttle at Park & Ride",
+          "10:35 AM MDT: Arrive at Moraine Lake",
+          "Explore Rockpile Trail viewpoint & flat shoreline walk",
+          "12:30 PM MDT: Walk to Moraine Lake Shuttle Boarding Zone",
+          "12:45 PM MDT: Board Lake Connector Shuttle bound for Lake Louise Lakeshore"
+        ],
+        parking: "SUV remains parked safely at Park & Ride Lot.",
+        vegFood: "Moraine Lake Lodge Cafe - Grab & go vegetarian wraps and hot tea.",
+        query: "Moraine+Lake"
+      },
+      {
+        id: "d1_2", day: 1, seq: 3, title: "3. Lake Louise Lakeshore & Lunch",
+        lat: 51.4177, lng: -116.2169,
+        time: "01:05 PM – 03:30 PM MDT", duration: "2 hours 25 mins",
+        temp: "Afternoon 8°C (Mild Sun)",
+        hours: "Lakeshore Open 24 Hours", warning: null,
+        desc: "Arrive via Lake Connector Shuttle. Flat paved shoreline walk in front of Fairmont Chateau & Victoria Glacier.",
+        steps: [
+          "01:05 PM MDT: Arrive at Lake Louise Lakeshore via connector shuttle",
+          "Walk paved shoreline pathway (Very easy for senior parents)",
+          "01:45 PM MDT: Vegetarian lunch near lakeshore / Chateau",
+          "03:15 PM MDT: Line up at Lake Louise Shuttle Stop",
+          "03:30 PM MDT: Board Parks Canada Shuttle back to Park & Ride"
+        ],
+        parking: "SUV remains parked safely at Park & Ride Lot.",
+        vegFood: "Lunch: Laggans Bakery (Lake Louise Village) - Veggie samosas, vegetable pies & pastries.",
+        query: "Lake+Louise"
+      },
+      {
+        id: "d1_3", day: 1, seq: 4, title: "4. Return to SUV → Drive to Takakkaw Falls",
+        lat: 51.4968, lng: -116.4828,
+        time: "03:45 PM – 05:15 PM MDT", duration: "1 hour 30 mins",
+        temp: "Late Afternoon 7°C (Mist/Cool)",
+        hours: "Yoho Valley Road Open (Closes mid-Oct)",
+        warning: null,
+        desc: "Arrive back at Park & Ride, retrieve rental SUV, and drive West into Yoho National Park.",
+        steps: [
+          "03:45 PM MDT: Arrive back at Park & Ride via return shuttle",
+          "Drive West on Trans-Canada Hwy / AB-1 W into Yoho NP",
+          "04:30 PM MDT: Arrive at Takakkaw Falls Parking Lot",
+          "Take easy 10-minute flat paved walk to base of waterfall",
+          "05:15 PM MDT: Depart Takakkaw Falls in SUV"
+        ],
+        parking: "Takakkaw Falls Day Use Parking Lot",
+        vegFood: null, query: "Takakkaw+Falls"
+      },
+      {
+        id: "d1_4", day: 1, seq: 5, title: "5. Drive to Golden Accommodation & Check-in",
+        lat: 51.2985, lng: -116.9802,
+        time: "05:15 PM – 06:15 PM MDT", duration: "1 hour drive (58 km)",
+        temp: "Evening 6°C",
+        hours: "Airbnb Check-in from 4:00 PM MDT", warning: null,
+        desc: "Drive from Yoho National Park to Golden Airbnb stay.",
+        steps: [
+          "Drive West on Trans-Canada Hwy / BC-1 W to Golden, BC",
+          "06:15 PM MDT: Check in at 1549 Kicking Horse Trail, Golden BC",
+          "Relax and head out for dinner in Golden town center"
+        ],
+        parking: "On-site driveway parking at 1549 Kicking Horse Trail, Golden BC",
+        vegFood: "Dinner in Golden: Whitetooth Bistro - Dedicated vegan/veg options (Tofu bowls, veg burgers, pasta).",
+        query: "1549+Kicking+Horse+Trail+Golden+BC"
+      },
+
+      // Day 2
+      {
+        id: "d2_0", day: 2, seq: 1, title: "1. Depart Golden Accommodation (Start 8:30 AM MDT)",
+        lat: 51.2985, lng: -116.9802,
+        time: "08:30 AM – 09:30 AM MDT (Oct 01)", duration: "1 hour drive to Icefields Pkwy",
+        temp: "Morning 1°C (Chilly)",
+        hours: "Private Residence Departure", warning: null,
+        desc: "Depart Golden stay at 08:30 AM MDT heading North toward Columbia Icefield.",
+        steps: [
+          "08:30 AM MDT: Depart 1549 Kicking Horse Trail, Golden BC in SUV",
+          "Drive East on BC-1 E then North on Icefields Pkwy / AB-93 N"
+        ],
+        parking: "1549 Kicking Horse Trail, Golden BC",
+        vegFood: null, query: "1549+Kicking+Horse+Trail+Golden+BC"
+      },
+      {
+        id: "d2_1", day: 2, seq: 2, title: "2. Scenic Drive to Columbia Icefield Discovery Centre",
+        lat: 52.2203, lng: -117.2241,
+        time: "09:30 AM – 11:15 AM MDT", duration: "1 hour 45 mins drive",
+        temp: "Mid-day 2°C",
+        hours: "Centre Opens 9:00 AM MDT", warning: null,
+        desc: "Scenic highway drive along Icefields Parkway to Columbia Icefield Discovery Centre.",
+        steps: [
+          "Drive North via Icefields Pkwy / AB-93 N",
+          "11:15 AM MDT: Arrive at Columbia Icefield Discovery Centre"
+        ],
+        parking: "Columbia Icefield Discovery Centre Main Parking Lot",
+        vegFood: "Pack breakfast/snacks from Golden (IGA Supermarket).",
+        query: "Columbia+Icefield+Glacier+Discovery+Centre"
+      },
+      {
+        id: "d2_2", day: 2, seq: 3, title: "3. Glacier Adventure & Skywalk Tour",
+        lat: 52.2215, lng: -117.2250,
+        time: "11:30 AM – 02:30 PM MDT", duration: "3 hours stop & tour",
+        temp: "Glacier Surface -3°C (Wind Chill / Freezing)",
+        hours: "Tours Operating 9:00 AM - 5:00 PM MDT",
+        warning: "⚠️ Sub-Zero Temperature Warning: Glacier surface is freezing (-3°C wind chill). Heavy coats, gloves & beanies required!",
+        desc: "Ride Ice Explorer mammoth truck onto Athabasca Glacier (heated bus, wheelchair accessible) + Glass Skywalk.",
+        steps: [
+          "11:30 AM MDT: Check in at Discovery Centre desk",
+          "Board Ice Explorer truck onto Athabasca Glacier",
+          "Visit Skywalk glass bridge walkway",
+          "01:45 PM MDT: Return to Discovery Centre for vegetarian lunch",
+          "02:30 PM MDT: Return to SUV and depart"
+        ],
+        parking: "Keep SUV parked at Discovery Centre Lot.",
+        vegFood: "Lunch: Altitude Restaurant (inside Discovery Centre) - Vegetarian rice bowls & hot soups.",
+        query: "Columbia+Icefield+Skywalk"
+      },
+      {
+        id: "d2_3", day: 2, seq: 4, title: "4. Sunwapta Falls",
+        lat: 52.5328, lng: -117.6453,
+        time: "03:05 PM – 03:45 PM MDT", duration: "40 mins (35m drive + 20m stop)",
+        temp: "Afternoon 3°C",
+        hours: "Daylight Access Only", warning: null,
+        desc: "Short drive north on Icefields Parkway. Walk 5 mins to footbridge overlooking canyon waterfall.",
+        steps: [
+          "03:05 PM MDT: Arrive at Sunwapta Falls",
+          "Easy 5-min paved path to Upper Falls bridge",
+          "03:45 PM MDT: Depart in SUV toward Athabasca Falls"
+        ],
+        parking: "Sunwapta Falls Parking Lot",
+        vegFood: null, query: "Sunwapta+Falls"
+      },
+      {
+        id: "d2_4", day: 2, seq: 5, title: "5. Athabasca Falls",
+        lat: 52.6644, lng: -117.8836,
+        time: "04:05 PM – 05:00 PM MDT", duration: "55 mins (20m drive + 35m stop)",
+        temp: "Late Afternoon 2°C",
+        hours: "Daylight Access (Sunset ~7:00 PM)", warning: null,
+        desc: "Paved circuit platforms with views of powerful waterfall and gorge.",
+        steps: [
+          "04:05 PM MDT: Arrive at Athabasca Falls",
+          "Walk railed paved loop (Senior accessible viewpoints)",
+          "05:00 PM MDT: Begin return drive to Golden accommodation"
+        ],
+        parking: "Athabasca Falls Day Use Parking Lot",
+        vegFood: null, query: "Athabasca+Falls"
+      },
+      {
+        id: "d2_5", day: 2, seq: 6, title: "6. Drive Back to Golden Accommodation",
+        lat: 51.2985, lng: -116.9802,
+        time: "05:00 PM – 08:15 PM MDT", duration: "3 hours 15 mins drive (235 km)",
+        temp: "Evening 3°C",
+        hours: "Private Residence", warning: null,
+        desc: "Relaxed scenic drive back along Icefields Parkway to Golden residence.",
+        steps: [
+          "Drive South via AB-93 S and BC-1 W",
+          "08:15 PM MDT: Arrive back at 1549 Kicking Horse Trail, Golden BC",
+          "Rest and enjoy dinner in Golden town"
+        ],
+        parking: "1549 Kicking Horse Trail, Golden BC",
+        vegFood: "Dinner in Golden: Indian Kitchen Golden - Outstanding vegetarian options (Paneer Butter Masala, Dal Makhani, Roti).",
+        query: "1549+Kicking+Horse+Trail+Golden+BC"
+      },
+
+      // Day 3
+      {
+        id: "d3_0", day: 3, seq: 1, title: "1. Depart Golden Accommodation (Start 8:30 AM MDT)",
+        lat: 51.2985, lng: -116.9802,
+        time: "08:30 AM – 09:15 AM MDT (Oct 02)", duration: "45 mins drive to Natural Bridge",
+        temp: "Morning 2°C",
+        hours: "Private Residence Departure", warning: null,
+        desc: "Check out of Golden accommodation and depart at 08:30 AM MDT heading East into Yoho National Park.",
+        steps: [
+          "08:30 AM MDT: Pack all luggage into rental SUV and depart Golden stay",
+          "Drive East on Trans-Canada Hwy / BC-1 E toward Field, BC"
+        ],
+        parking: "1549 Kicking Horse Trail, Golden BC",
+        vegFood: null, query: "1549+Kicking+Horse+Trail+Golden+BC"
+      },
+      {
+        id: "d3_1", day: 3, seq: 2, title: "2. Natural Bridge Lower Falls",
+        lat: 51.3824, lng: -116.5303,
+        time: "09:15 AM – 10:15 AM MDT", duration: "1 hour stop",
+        temp: "Morning 4°C",
+        hours: "Open 24 Hours", warning: null,
+        desc: "Impressive natural rock formation carved by the Kicking Horse River. Very short, flat paved walkway from parking lot.",
+        steps: [
+          "09:15 AM MDT: Arrive at Natural Bridge Parking Lot",
+          "Walk 2 minutes on flat paved path to viewing bridges & water chasms",
+          "10:15 AM MDT: Depart for Emerald Lake (5 mins drive)"
+        ],
+        parking: "Natural Bridge Day Use Parking Lot (Free)",
+        vegFood: null, query: "Natural+Bridge+Yoho+National+Park"
+      },
+      {
+        id: "d3_2", day: 3, seq: 3, title: "3. Emerald Lake Morning Stroll",
+        lat: 51.4428, lng: -116.5422,
+        time: "10:20 AM – 11:30 AM MDT", duration: "1 hour 10 mins stop",
+        temp: "Late Morning 7°C",
+        hours: "Open 24 Hours", warning: null,
+        desc: "Enjoy morning reflection at Emerald Lake. Flat wooden bridge and shoreline bench seating ideal for parents.",
+        steps: [
+          "10:20 AM MDT: Arrive at Emerald Lake Parking Lot",
+          "Stroll wooden bridge near Emerald Lake Lodge with parents",
+          "11:30 AM MDT: Depart for Banff Gondola (1 hour 15 mins drive)"
+        ],
+        parking: "Emerald Lake Main Parking Lot",
+        vegFood: "Cilantro Cafe at Emerald Lake Lodge - Good hot drinks & muffins.",
+        query: "Emerald+Lake"
+      },
+      {
+        id: "d3_3", day: 3, seq: 4, title: "4. Banff Gondola (Sulphur Mountain Summit)",
+        lat: 51.1485, lng: -115.5562,
+        time: "12:45 PM – 03:00 PM MDT", duration: "2 hours 15 mins stop",
+        temp: "Summit 1°C to 4°C (Breezy/Windbreaker needed)",
+        hours: "Operating Hours: 9:00 AM – 9:00 PM MDT",
+        warning: "⚠️ Weather Note: Summit is breezy and cool. Heated indoor upper terminal, elevators, and boardwalk seating available for seniors.",
+        desc: "Ride fully enclosed 4-passenger gondola cabin up Sulphur Mountain (100 Mountain Ave) for 360-degree views of Banff & Bow Valley.",
+        steps: [
+          "12:45 PM MDT: Arrive at Banff Gondola Terminal (100 Mountain Ave)",
+          "Board enclosed gondola cabin to summit terminal (8-min ride)",
+          "Explore upper boardwalk, multi-sensory theatre & panoramic observation deck",
+          "03:00 PM MDT: Return to base via gondola and drive to Cave & Basin (10 mins drive)"
+        ],
+        parking: "Banff Gondola Base Parking Lot",
+        vegFood: "Sky Bistro / Northern Lights Alpine Kitchen (Summit Terminal) - Veggie bowls, fries & hot cocoa.",
+        query: "Banff+Gondola+100+Mountain+Ave"
+      },
+      {
+        id: "d3_4", day: 3, seq: 5, title: "5. Cave and Basin National Historic Site",
+        lat: 51.1711, lng: -115.5925,
+        time: "03:15 PM – 04:30 PM MDT", duration: "1 hour 15 mins stop",
+        temp: "Afternoon 10°C (Mild)",
+        hours: "Site Open 10:00 AM – 5:00 PM MDT (Indoor Exhibits Close 5:00 PM)",
+        warning: "⚠️ Timing Verified: Arriving at 3:15 PM allows plenty of time before indoor exhibits close at 5:00 PM.",
+        desc: "Birthplace of Canada's National Parks. Easy flat boardwalks around thermal hot springs and indoor cavern exhibit.",
+        steps: [
+          "03:15 PM MDT: Arrive at Cave and Basin Historic Site",
+          "Visit historic thermal cave and indoor museum displays",
+          "Stroll short thermal boardwalk loop outside with parents",
+          "04:30 PM MDT: Depart for Banff Downtown (5 mins drive)"
+        ],
+        parking: "Cave and Basin Visitor Parking Lot",
+        vegFood: null, query: "Cave+and+Basin+National+Historic+Site"
+      },
+      {
+        id: "d3_5", day: 3, seq: 6, title: "6. Banff Downtown, Dinner & Cascade Gardens",
+        lat: 51.1784, lng: -115.5708,
+        time: "04:45 PM – 07:00 PM MDT", duration: "2 hours 15 mins stop",
+        temp: "Evening 8°C",
+        hours: "Shops Open until 8:00 PM MDT", warning: null,
+        desc: "Stroll Banff Avenue, enjoy vegetarian dinner, and visit Cascade of Time Gardens.",
+        steps: [
+          "04:45 PM MDT: Park at Bear Street Parkade in Banff town",
+          "05:00 PM MDT: Vegetarian Dinner at Nourish Bistro Banff",
+          "06:15 PM MDT: Stroll to Cascade of Time Gardens (Flat pathways & flower terraces)",
+          "07:00 PM MDT: Depart Banff for Calgary stay (1 hour 35 mins drive)"
+        ],
+        parking: "Bear Street Parkade (Free 9-hour parking) or Train Station Lot.",
+        vegFood: "Meal: Nourish Bistro Banff - Premier 100% Vegetarian/Vegan restaurant (Famous Veggie Nachos, Curry Bowls & Smoothies).",
+        query: "Banff+Downtown"
+      },
+      {
+        id: "d3_6", day: 3, seq: 7, title: "7. Drive to Calgary Stay",
+        lat: 50.8996, lng: -114.0954,
+        time: "07:00 PM – 08:35 PM MDT", duration: "1 hour 35 mins drive (135 km)",
+        temp: "Night 6°C",
+        hours: "Private Residence", warning: null,
+        desc: "Drive from Banff back to Calgary residence for remaining nights.",
+        steps: [
+          "Drive East on Trans-Canada Hwy / AB-1 E toward Calgary",
+          "08:35 PM MDT: Arrive at 66 Silverado Skies Dr SW, Calgary AB",
+          "Unpack and check in for evening rest"
+        ],
+        parking: "66 Silverado Skies Dr SW, Calgary AB",
+        vegFood: "Calgary Late Night: South Indian Dosa Hut or Pizza near SW Calgary.",
+        query: "66+Silverado+Skies+Dr+SW+Calgary+AB"
+      },
+
+      // Day 4 & Departure
+      {
+        id: "d4_1", day: 4, seq: 1, title: "1. Rest & Recovery Day in Calgary (Oct 03)",
+        lat: 50.8996, lng: -114.0954,
+        time: "Full Day MDT (Oct 03)", duration: "Full Rest Day",
+        temp: "Day 12°C / Night 3°C",
+        hours: "Full Day", warning: null,
+        desc: "Full rest and recovery day at Calgary residence with family.",
+        steps: ["Relax at home", "Pack luggage for early morning flight", "Early bed time for 4:00 AM wake up"],
+        parking: "66 Silverado Skies Dr SW, Calgary AB",
+        vegFood: "Calgary Local Veg: Veg-In YYC or Calgary Dosa Corner.",
+        query: "66+Silverado+Skies+Dr+SW+Calgary+AB"
+      },
+      {
+        id: "d4_2", day: 4, seq: 2, title: "2. Early Airport Departure & Return Flight (Oct 04)",
+        lat: 51.1215, lng: -114.0076,
+        time: "04:30 AM – 07:00 AM MDT (Oct 04)", duration: "2 hours 30 mins process",
+        temp: "Early Morning 2°C",
+        hours: "24 Hours Airport Access", warning: null,
+        desc: "Early morning airport drive, SUV drop-off, and return flight AA1633 to ORD.",
+        steps: [
+          "04:30 AM MDT: Leave 66 Silverado Skies Dr SW in rental SUV",
+          "05:15 AM MDT: Drop off rental SUV at YYC Car Rental Return Garage",
+          "05:35 AM MDT: Clear security with family",
+          "07:00 AM MDT: Board Flight AA1633 YYC → ORD (Arrive ORD 11:29 AM)"
+        ],
+        parking: "YYC Rental Car Return Garage",
+        vegFood: "YYC Airport Post-Security: Tim Hortons or Starbucks.",
+        query: "Calgary+International+Airport"
+      }
+    ];
+
+    let map, markers = [], routePolylines = [];
+    let currentFilter = 'all';
+
+    function initMap() {
+      map = L.map('map').setView([51.25, -115.80], 8);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 18,
+        attribution: '© OpenStreetMap'
+      }).addTo(map);
+
+      renderMarkersAndRoutes('all');
+    }
+
+    function getDayColor(day) {
+      switch(day) {
+        case 1: return '#2563eb';
+        case 2: return '#ea580c';
+        case 3: return '#16a34a';
+        default: return '#1e3a8a';
+      }
+    }
+
+    function renderMarkersAndRoutes(dayFilter) {
+      markers.forEach(m => map.removeLayer(m));
+      routePolylines.forEach(p => map.removeLayer(p));
+      markers = [];
+      routePolylines = [];
+
+      const filtered = (dayFilter === 'bookings')
+        ? []
+        : locations.filter(loc => dayFilter === 'all' || loc.day === dayFilter);
+      const bounds = [];
+
+      const dayGroups = {};
+      filtered.forEach(loc => {
+        if (!dayGroups[loc.day]) dayGroups[loc.day] = [];
+        dayGroups[loc.day].push(loc);
+      });
+
+      Object.keys(dayGroups).forEach(dayNum => {
+        const points = dayGroups[dayNum].map(loc => [loc.lat, loc.lng]);
+        if (points.length > 1) {
+          const polyline = L.polyline(points, {
+            color: getDayColor(parseInt(dayNum)),
+            weight: 3.5,
+            opacity: 0.8,
+            dashArray: dayNum == 0 || dayNum == 4 ? '5, 8' : null
+          }).addTo(map);
+          routePolylines.push(polyline);
         }
-    </script>
+      });
+
+      filtered.forEach(loc => {
+        bounds.push([loc.lat, loc.lng]);
+        const pinColor = getDayColor(loc.day);
+        const customIcon = L.divIcon({
+          className: 'custom-pin',
+          html: `<div class="map-num-pin" style="background-color: ${pinColor}">${loc.seq}</div>`,
+          iconSize: [22, 22],
+          iconAnchor: [11, 11]
+        });
+
+        const marker = L.marker([loc.lat, loc.lng], { icon: customIcon }).addTo(map);
+        marker.bindPopup(`
+          <div style="font-size:0.8rem; font-weight:bold; color:var(--primary);">${loc.title}</div>
+          <div style="font-size:0.72rem; color:#475569; margin-top:2px;">${loc.time}</div>
+          <div style="font-size:0.72rem; color:#0284c7; font-weight:600;">🌡️ ${loc.temp}</div>
+          <a href="https://www.google.com/maps/search/?api=1&query=${loc.query}" target="_blank" style="font-size:0.72rem; color:#2563eb; text-decoration:none; display:inline-block; margin-top:4px;">🧭 Open in Google Maps</a>
+        `);
+        markers.push(marker);
+      });
+
+      if (bounds.length > 0) {
+        map.fitBounds(bounds, { padding: [30, 30] });
+      }
+    }
+
+    function renderItinerary(dayFilter) {
+      const container = document.getElementById('itinerary-list');
+      container.innerHTML = '';
+
+      let listToRender = [];
+      if (dayFilter === 'bookings') {
+        listToRender = bookingsData;
+      } else if (dayFilter === 'all') {
+        listToRender = [...bookingsData, ...locations];
+      } else {
+        listToRender = locations.filter(loc => loc.day === dayFilter);
+      }
+
+      const completedState = JSON.parse(localStorage.getItem('rockies_completed_v7') || '{}');
+
+      listToRender.forEach(loc => {
+        const isChecked = !!completedState[loc.id];
+        const card = document.createElement('div');
+        const dayClass = (loc.day === 'bookings') ? 'day-bookings' : `day-${loc.day}`;
+        card.className = `itinerary-item ${dayClass} ${isChecked ? 'completed' : ''}`;
+        card.id = `card-${loc.id}`;
+
+        let stepsHtml = '';
+        if (loc.steps && loc.steps.length > 0) {
+          stepsHtml = `<div class="step-box"><strong>📋 Details & Direct Instructions:</strong><ul>${loc.steps.map(s => `<li>${s}</li>`).join('')}</ul></div>`;
+        }
+
+        let warningHtml = '';
+        if (loc.warning) {
+          warningHtml = `<div class="warning-box">${loc.warning}</div>`;
+        }
+
+        let vegHtml = '';
+        if (loc.vegFood) {
+          vegHtml = `<div class="veg-badge">🥗 <strong>Vegetarian Meal Note:</strong> ${loc.vegFood}</div>`;
+        }
+
+        let actionBtnHtml = '';
+        if (loc.url) {
+          actionBtnHtml = `<a href="${loc.url}" target="_blank" class="nav-btn official-link">${loc.linkText}</a>`;
+        } else {
+          actionBtnHtml = `<a href="https://www.google.com/maps/search/?api=1&query=${loc.query}" target="_blank" class="nav-btn">🧭 Navigate</a>`;
+        }
+
+        card.innerHTML = `
+          <div class="item-header">
+            <h3>${loc.title}</h3>
+            <label class="checkbox-container">
+              <input type="checkbox" onchange="toggleComplete('${loc.id}')" ${isChecked ? 'checked' : ''}>
+              <span class="checkmark"></span>
+            </label>
+          </div>
+          <div class="meta-row">
+            <span class="time-badge">⏰ ${loc.time}</span>
+            <span class="duration-badge">⏱️ ${loc.duration}</span>
+            <span class="temp-badge">🏷️ ${loc.temp}</span>
+            <span class="hours-badge">🏛️ ${loc.hours}</span>
+          </div>
+          ${warningHtml}
+          <p style="font-size: 0.78rem; color: #475569; margin-bottom: 8px;">${loc.desc}</p>
+          ${stepsHtml}
+          ${vegHtml}
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
+            <span class="parking-badge">🅿️ ${loc.parking}</span>
+            ${actionBtnHtml}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      updateProgressBar();
+    }
+
+    function toggleComplete(id) {
+      const completedState = JSON.parse(localStorage.getItem('rockies_completed_v7') || '{}');
+      completedState[id] = !completedState[id];
+      localStorage.setItem('rockies_completed_v7', JSON.stringify(completedState));
+      
+      const card = document.getElementById(`card-${id}`);
+      if (card) {
+        if (completedState[id]) {
+          card.classList.add('completed');
+        } else {
+          card.classList.remove('completed');
+        }
+      }
+      updateProgressBar();
+    }
+
+    function updateProgressBar() {
+      const completedState = JSON.parse(localStorage.getItem('rockies_completed_v7') || '{}');
+      const allItems = [...bookingsData, ...locations];
+      const total = allItems.length;
+      const completedCount = allItems.filter(loc => completedState[loc.id]).length;
+      const pct = Math.round((completedCount / total) * 100);
+
+      document.getElementById('progress-bar').style.width = `${pct}%`;
+      document.getElementById('progress-text').innerText = `Trip Progress: ${completedCount}/${total} Completed (${pct}%)`;
+    }
+
+    function filterDay(day) {
+      currentFilter = day;
+      document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+
+      renderMarkersAndRoutes(day);
+      renderItinerary(day);
+    }
+
+    function toggleAiModal() {
+      const modal = document.getElementById('ai-modal');
+      modal.style.display = modal.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function askGemini() {
+      const query = document.getElementById('ai-input').value.toLowerCase().trim();
+      const output = document.getElementById('ai-output');
+      if (!query) return;
+
+      output.style.display = 'block';
+      output.innerHTML = '<em>Thinking...</em>';
+
+      setTimeout(() => {
+        if (query.includes('day 3') || query.includes('sequence')) {
+          output.innerHTML = `<strong>Day 3 Sequence (Oct 02):</strong><br/>
+          1. Depart Golden (8:30 AM MDT)<br/>
+          2. Natural Bridge Lower Falls (9:15 AM MDT)<br/>
+          3. Emerald Lake Stroll (10:20 AM MDT)<br/>
+          4. Banff Gondola - Sulphur Mountain (12:45 PM MDT)<br/>
+          5. Cave and Basin Historic Site (3:15 PM MDT - before 5 PM close)<br/>
+          6. Banff Downtown, Nourish Bistro & Cascade Gardens (4:45 PM MDT)<br/>
+          7. Drive to Calgary Residence (7:00 PM MDT)`;
+        } else if (query.includes('timezone') || query.includes('time')) {
+          output.innerHTML = `<strong>Timezone Summary:</strong><br/>
+          All stops (including Golden, BC) are on Mountain Time (MDT). Your clock does not need to change throughout the entire trip.`;
+        } else if (query.includes('veg') || query.includes('food') || query.includes('dinner')) {
+          output.innerHTML = `<strong>Key Vegetarian Dining Spot Highlights:</strong><br/>
+          • <strong>Day 1 (Golden):</strong> Whitetooth Bistro (Tofu bowls, veg burgers).<br/>
+          • <strong>Day 2 (Golden):</strong> Indian Kitchen Golden (Paneer Butter Masala, Dal Makhani).<br/>
+          • <strong>Day 3 (Banff):</strong> Nourish Bistro Banff (100% Veggie Nachos & Curry Bowls).`;
+        } else if (query.includes('weather') || query.includes('cloth') || query.includes('cold') || query.includes('temp')) {
+          output.innerHTML = `<strong>Weather Guidance:</strong><br/>
+          • <strong>Day 1:</strong> 8°C High / 0°C Low.<br/>
+          • <strong>Day 2 (Icefields):</strong> Sub-zero (-3°C wind chill on glacier). Gloves, beanie & winter coat needed!<br/>
+          • <strong>Day 3:</strong> 11°C High / 1°C Low. Summit of Sulphur Mountain requires windbreakers.`;
+        } else if (query.includes('booking') || query.includes('shuttle') || query.includes('pass') || query.includes('deadline')) {
+          output.innerHTML = `<strong>Bookings & Release Deadlines:</strong><br/>
+          • <strong>Discovery Pass:</strong> Purchase online in advance & place printed copy on dashboard.<br/>
+          • <strong>Lake Louise Shuttle:</strong> 60% of tickets open on a rolling 48-hour release prior to travel date at 8:00 AM MT.<br/>
+          • <strong>Columbia Icefield & Gondola:</strong> Advance timed reservations required to guarantee time slots.`;
+        } else {
+          output.innerHTML = `<strong>General Travel Info:</strong><br/>
+          All locations feature senior-accessible options, flat walking routes, and nearby restrooms. Ensure Parks Canada Pass is displayed on your rental SUV windshield.`;
+        }
+      }, 400);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initMap();
+      renderItinerary('all');
+    });
+  </script>
 </body>
 </html>
