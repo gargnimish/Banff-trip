@@ -1,4 +1,4 @@
-const CACHE_NAME = 'banff-trip-v8';
+const CACHE_NAME = 'banff-trip-v9';
 const ASSETS = [
   './',
   './index.html',
