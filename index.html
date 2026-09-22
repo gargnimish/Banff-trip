@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Canadian Rockies Itinerary Dashboard v8</title>
+  <title>Canadian Rockies Itinerary Dashboard v9</title>
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#1e3a8a" />
 
@@ -127,11 +127,11 @@
 <body>
 
   <header>
-    <h1>Calgary & Banff Expedition v8</h1>
+    <h1>Calgary & Banff Expedition v9</h1>
     <div class="progress-container">
       <div id="progress-bar" class="progress-bar"></div>
     </div>
-    <div id="progress-text" class="progress-text">Trip Progress: 0/18 Completed (0%)</div>
+    <div id="progress-text" class="progress-text">Trip Progress: 0/19 Completed (0%)</div>
   </header>
 
   <div class="map-wrapper">
@@ -166,14 +166,14 @@
       <strong>🌤️ Daily Weather & Clothing Summary:</strong>
       • <strong>Day 1 (Banff & Yoho):</strong> High 11°C / Low 1°C. Crisp morning, windbreaker needed for Sulphur Mountain summit.<br/>
       • <strong>Day 2 (Icefields Parkway):</strong> High 2°C / Low -3°C. Sub-zero wind chill on glacier! Thermals, gloves & beanies required.<br/>
-      • <strong>Day 3 (Yoho & Lake Louise):</strong> High 8°C / Low 0°C. Cool morning around Takakkaw Falls & lakeshores, wear fleece/warm jacket.
+      • <strong>Day 3 (Yoho, Lake Louise & Banff Downtown):</strong> High 8°C / Low 0°C. Cool morning around lakes, pleasant evening in Banff Downtown for walking & dinner.
     </div>
 
     <!-- Parent & Senior Care Guidelines -->
     <div id="parent-card" class="parent-care-card">
       <h4>👴 Parents & Senior Care Considerations</h4>
-      • <strong>Restroom Access:</strong> Available at Cave & Basin, Banff Gondola Terminal, Emerald Lake Lodge, Natural Bridge, Columbia Icefield Centre, Takakkaw Falls, Park & Ride, Moraine Lake Lodge, and Lake Louise Lakeshore.<br/>
-      • <strong>Pacing & Mobility:</strong> Cave & Basin, Banff Gondola, Emerald Lake, and Natural Bridge all feature short, flat, senior-friendly access paths directly adjacent to parking.
+      • <strong>Restroom Access:</strong> Available at Cave & Basin, Banff Gondola Terminal, Emerald Lake Lodge, Natural Bridge, Columbia Icefield Centre, Takakkaw Falls, Park & Ride, Moraine Lake Lodge, Lake Louise Lakeshore, and Banff Visitor Centre / Bear Street Garage.<br/>
+      • <strong>Pacing & Mobility:</strong> Cave & Basin, Banff Gondola, Emerald Lake, Natural Bridge, and Banff Downtown all feature flat, senior-friendly walking surfaces with ample seating.
     </div>
 
     <!-- Alert Banner -->
@@ -195,7 +195,7 @@
       <button class="ai-close-btn" onclick="toggleAiModal()">✕</button>
     </div>
     <p style="font-size: 0.72rem; color: #64748b; margin-bottom: 6px;">Ask questions about schedule, weather, timezones, or veg food:</p>
-    <textarea id="ai-input" placeholder="e.g. What is the sequence for Day 1? Where is Banff Gondola?"></textarea>
+    <textarea id="ai-input" placeholder="e.g. What is the Day 3 schedule? Where to park in Banff downtown?"></textarea>
     <button class="submit-btn" onclick="askGemini()">Ask Assistant</button>
     <div id="ai-output" class="ai-response" style="display:none;"></div>
   </div>
@@ -295,7 +295,7 @@
         vegFood: null, query: "66+Silverado+Skies+Dr+SW+Calgary+AB"
       },
 
-      // Day 1 (Swapped from Day 3 & Restructured - Start 9:00 AM)
+      // Day 1
       {
         id: "d1_0", day: 1, seq: 1, title: "1. Depart Calgary Residence → Cave & Basin",
         lat: 50.8996, lng: -114.0954,
@@ -395,7 +395,7 @@
         query: "1549+Kicking+Horse+Trail+Golden+BC"
       },
 
-      // Day 2 (Kept Same)
+      // Day 2
       {
         id: "d2_0", day: 2, seq: 1, title: "1. Depart Golden Accommodation (Start 8:30 AM MDT)",
         lat: 51.2985, lng: -116.9802,
@@ -491,7 +491,7 @@
         query: "1549+Kicking+Horse+Trail+Golden+BC"
       },
 
-      // Day 3 (Swapped from Day 1 & Restructured)
+      // Day 3 (Updated with Banff Downtown)
       {
         id: "d3_0", day: 3, seq: 1, title: "1. Depart Golden Accommodation",
         lat: 51.2985, lng: -116.9802,
@@ -507,7 +507,7 @@
         vegFood: null, query: "1549+Kicking+Horse+Trail+Golden+BC"
       },
       {
-        id: "d3_1", day: 3, seq: 2, title: "2. Takakkaw Falls",
+        id: "d3_1", day: 3, seq: 2, title: "Spot 1: Takakkaw Falls",
         lat: 51.4968, lng: -116.4828,
         time: "08:45 AM – 09:45 AM MDT", duration: "1 hour stop",
         temp: "Morning 4°C (Mist/Cool)",
@@ -522,7 +522,7 @@
         vegFood: null, query: "Takakkaw+Falls"
       },
       {
-        id: "d3_2", day: 3, seq: 3, title: "3. Drive to Lake Louise Park & Ride",
+        id: "d3_2", day: 3, seq: 3, title: "2. Drive to Lake Louise Park & Ride",
         lat: 51.4225, lng: -116.1802,
         time: "09:45 AM – 10:25 AM MDT", duration: "40 mins drive",
         temp: "Late Morning 6°C",
@@ -538,7 +538,7 @@
         query: "Lake+Louise+Park+and+Ride"
       },
       {
-        id: "d3_3", day: 3, seq: 4, title: "4. Shuttle to Moraine Lake & Rockpile Trail",
+        id: "d3_3", day: 3, seq: 4, title: "Spot 2: Shuttle to Moraine Lake & Rockpile Trail",
         lat: 51.3217, lng: -116.1860,
         time: "10:25 AM – 01:00 PM MDT", duration: "2 hours 35 mins stop",
         temp: "Daytime 7°C (Fleece/Jacket)",
@@ -556,7 +556,7 @@
         query: "Moraine+Lake"
       },
       {
-        id: "d3_4", day: 3, seq: 5, title: "5. Lake Louise Lakeshore & Lunch",
+        id: "d3_4", day: 3, seq: 5, title: "Spot 3: Lake Louise Lakeshore & Lunch",
         lat: 51.4177, lng: -116.2169,
         time: "01:00 PM – 03:30 PM MDT", duration: "2 hours 30 mins stop",
         temp: "Afternoon 8°C (Mild Sun)",
@@ -574,33 +574,53 @@
         query: "Lake+Louise"
       },
       {
-        id: "d3_5", day: 3, seq: 6, title: "6. Return Shuttle & Retrieve Rental SUV",
+        id: "d3_5", day: 3, seq: 6, title: "5. Return Shuttle & Drive East to Banff",
         lat: 51.4225, lng: -116.1802,
-        time: "03:30 PM – 04:00 PM MDT", duration: "30 mins transition",
-        temp: "Late Afternoon 7°C",
-        hours: "Shuttle Terminal", warning: null,
-        desc: "Take return shuttle to Park & Ride and retrieve rental SUV.",
+        time: "03:30 PM – 04:45 PM MDT", duration: "1 hour 15 mins (30m shuttle + 45m drive)",
+        temp: "Late Afternoon 8°C",
+        hours: "Transit to Banff Downtown", warning: null,
+        desc: "Take return shuttle to Park & Ride, retrieve rental SUV, and drive East via Trans-Canada Hwy / AB-1 E (~57 km) to Banff Downtown.",
         steps: [
-          "03:30 PM MDT: Take return shuttle to Park & Ride",
-          "04:00 PM MDT: Retrieve rental SUV and begin drive to Calgary"
+          "03:30 PM MDT: Board return shuttle to Park & Ride",
+          "04:00 PM MDT: Retrieve rental SUV",
+          "Drive East on AB-1 E toward Banff (~57 km, ~45 mins drive)",
+          "04:45 PM MDT: Arrive in Banff Downtown"
         ],
-        parking: "Park & Ride Lot",
-        vegFood: null, query: "Lake+Louise+Park+and+Ride"
+        parking: "Bear Street Parkade / Bow Avenue Parking Lot, Banff Downtown",
+        vegFood: null, query: "Banff+Downtown+Banff+AB"
       },
       {
-        id: "d3_6", day: 3, seq: 7, title: "7. Drive to Calgary Residence",
-        lat: 50.8996, lng: -114.0954,
-        time: "04:00 PM – 05:40 PM MDT", duration: "1 hour 40 mins drive (184 km)",
+        id: "d3_6", day: 3, seq: 7, title: "Spot 4: Banff Downtown Stroll & Dinner",
+        lat: 51.1784, lng: -115.5708,
+        time: "04:45 PM – 06:45 PM MDT", duration: "2 hours stay",
         temp: "Evening 7°C",
-        hours: "Private Residence Arrival", warning: null,
-        desc: "Drive East via Trans-Canada Hwy / AB-1 E from Lake Louise back to Calgary residence (66 Silverado Skies Dr SW) (~1 hour 40 mins drive).",
+        hours: "Shops Open 10:00 AM - 9:00 PM", warning: null,
+        desc: "Stroll Banff Avenue pedestrian precinct, explore souvenir shops, take iconic photo with Cascade Mountain, and enjoy vegetarian dinner.",
         steps: [
-          "Drive East via Trans-Canada Hwy / AB-1 E toward Calgary",
-          "05:40 PM MDT: Arrive at Calgary residence (66 Silverado Skies Dr SW)",
-          "Unpack SUV and relax for the evening"
+          "04:45 PM MDT: Park SUV at Bear Street Parkade or Bow Avenue Lot",
+          "Stroll Banff Avenue and Bear Street pedestrian areas with parents",
+          "Browse local boutique shops, souvenir stores, and sweet shops (Banff Candy Store / BeaverTails)",
+          "05:45 PM MDT: Sit-down vegetarian dinner in Banff Downtown",
+          "06:45 PM MDT: Return to SUV and begin final drive back to Calgary"
+        ],
+        parking: "Bear Street Public Parkade (Multi-level covered parking, central & senior accessible)",
+        vegFood: "Dinner in Banff: Indian Curry House Banff or Nourish Bistro - 100% vegetarian plant-based gourmet menu.",
+        query: "Banff+Avenue+Banff+AB"
+      },
+      {
+        id: "d3_7", day: 3, seq: 8, title: "7. Drive to Calgary Residence",
+        lat: 50.8996, lng: -114.0954,
+        time: "06:45 PM – 08:15 PM MDT", duration: "1 hour 30 mins drive (128 km)",
+        temp: "Night 5°C",
+        hours: "Private Residence Arrival", warning: null,
+        desc: "Drive East via Trans-Canada Hwy / AB-1 E from Banff Downtown back to Calgary residence (66 Silverado Skies Dr SW).",
+        steps: [
+          "06:45 PM MDT: Depart Banff Downtown heading East on AB-1 E",
+          "08:15 PM MDT: Arrive at Calgary residence (66 Silverado Skies Dr SW)",
+          "Unpack SUV, unwind with family, and rest after an amazing 3-day expedition!"
         ],
         parking: "66 Silverado Skies Dr SW, Calgary AB",
-        vegFood: "Calgary Dinner: South Indian Dosa Hut or local vegetarian options near SW Calgary.",
+        vegFood: null,
         query: "66+Silverado+Skies+Dr+SW+Calgary+AB"
       },
 
@@ -726,7 +746,7 @@
         listToRender = locations.filter(loc => loc.day === dayFilter);
       }
 
-      const completedState = JSON.parse(localStorage.getItem('rockies_completed_v8') || '{}');
+      const completedState = JSON.parse(localStorage.getItem('rockies_completed_v9') || '{}');
 
       listToRender.forEach(loc => {
         const isChecked = !!completedState[loc.id];
@@ -787,9 +807,9 @@
     }
 
     function toggleComplete(id) {
-      const completedState = JSON.parse(localStorage.getItem('rockies_completed_v8') || '{}');
+      const completedState = JSON.parse(localStorage.getItem('rockies_completed_v9') || '{}');
       completedState[id] = !completedState[id];
-      localStorage.setItem('rockies_completed_v8', JSON.stringify(completedState));
+      localStorage.setItem('rockies_completed_v9', JSON.stringify(completedState));
       
       const card = document.getElementById(`card-${id}`);
       if (card) {
@@ -803,7 +823,7 @@
     }
 
     function updateProgressBar() {
-      const completedState = JSON.parse(localStorage.getItem('rockies_completed_v8') || '{}');
+      const completedState = JSON.parse(localStorage.getItem('rockies_completed_v9') || '{}');
       const allItems = [...bookingsData, ...locations];
       const total = allItems.length;
       const completedCount = allItems.filter(loc => completedState[loc.id]).length;
@@ -844,15 +864,16 @@
           4. Spot 3: Emerald Lake (3:45 PM MDT)<br/>
           5. Spot 4: Natural Bridge Lower Falls (5:10 PM MDT)<br/>
           6. Drive to Golden Accommodation (6:00 PM MDT)`;
-        } else if (query.includes('day 3')) {
+        } else if (query.includes('day 3') || query.includes('banff downtown')) {
           output.innerHTML = `<strong>Day 3 Sequence (Oct 02):</strong><br/>
           1. Depart Golden Accommodation (8:00 AM MDT)<br/>
-          2. Takakkaw Falls (8:45 AM MDT)<br/>
+          2. Spot 1: Takakkaw Falls (8:45 AM MDT)<br/>
           3. Drive to Lake Louise Park & Ride (9:45 AM MDT)<br/>
-          4. Shuttle to Moraine Lake (10:25 AM MDT)<br/>
-          5. Lake Louise Lakeshore (1:00 PM MDT)<br/>
-          6. Return Shuttle & SUV Pick-up (3:30 PM MDT)<br/>
-          7. Drive to Calgary Residence (4:00 PM MDT)`;
+          4. Spot 2: Shuttle to Moraine Lake (10:25 AM MDT)<br/>
+          5. Spot 3: Lake Louise Lakeshore (1:00 PM MDT)<br/>
+          6. Return Shuttle & Drive to Banff (3:30 PM MDT)<br/>
+          7. Spot 4: Banff Downtown Stroll & Dinner (4:45 PM MDT)<br/>
+          8. Return Drive to Calgary Residence (6:45 PM MDT)`;
         } else if (query.includes('timezone') || query.includes('time')) {
           output.innerHTML = `<strong>Timezone Summary:</strong><br/>
           All stops (including Golden, BC) are on Mountain Time (MDT). Your clock does not need to change throughout the entire trip.`;
@@ -860,12 +881,12 @@
           output.innerHTML = `<strong>Key Vegetarian Dining Spot Highlights:</strong><br/>
           • <strong>Day 1 (Gondola / Golden):</strong> Sky Bistro lunch / Whitetooth Bistro in Golden.<br/>
           • <strong>Day 2 (Golden):</strong> Indian Kitchen Golden (Paneer Butter Masala, Dal Makhani).<br/>
-          • <strong>Day 3 (Lake Louise / Calgary):</strong> Laggans Bakery & Trailhead Cafe.`;
+          • <strong>Day 3 (Banff Downtown):</strong> Indian Curry House Banff or Nourish Bistro (100% vegetarian).`;
         } else if (query.includes('weather') || query.includes('cloth') || query.includes('cold') || query.includes('temp')) {
           output.innerHTML = `<strong>Weather Guidance:</strong><br/>
           • <strong>Day 1:</strong> 11°C High / 1°C Low. Summit of Sulphur Mountain requires windbreakers.<br/>
           • <strong>Day 2 (Icefields):</strong> Sub-zero (-3°C wind chill on glacier). Gloves, beanie & winter coat needed!<br/>
-          • <strong>Day 3:</strong> 8°C High / 0°C Low. Warm fleece/jackets needed around waterfalls & lakes.`;
+          • <strong>Day 3:</strong> 8°C High / 0°C Low. Warm fleece/jackets needed around waterfalls & lakes, pleasant evening in Banff Downtown.`;
         } else if (query.includes('booking') || query.includes('shuttle') || query.includes('pass') || query.includes('deadline')) {
           output.innerHTML = `<strong>Bookings & Release Deadlines:</strong><br/>
           • <strong>Discovery Pass:</strong> Purchase online in advance & place printed copy on dashboard.<br/>
